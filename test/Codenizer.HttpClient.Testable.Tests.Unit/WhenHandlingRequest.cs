@@ -11,7 +11,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public async void GivenConfiguredResponseCodeOk_ResponseStatusIsOk()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
@@ -29,7 +29,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public async void GivenConfiguredResponseBody_ResponseContainsBody()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
@@ -50,7 +50,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public async void GivenResponseMediaTypeIsApplicationJson_ContentTypeIsSetWithCharsetOption()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
@@ -71,7 +71,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public async void GivenResponseHeaderConfigured_ResponseContainsHeader()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler

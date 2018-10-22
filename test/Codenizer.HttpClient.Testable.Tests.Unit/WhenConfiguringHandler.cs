@@ -10,7 +10,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenExceptionShouldBeThrown_ExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.ShouldThrow(new Exception("BANG"));
@@ -26,7 +26,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenTwoResponsesForSamePath_MultipleResponsesExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.RespondTo("/api/hello");
@@ -40,7 +40,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenTwoResponsesForSamePathAndQueryString_MultipleResponsesExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.RespondTo("/api/hello?foo=bar");
@@ -54,7 +54,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenTwoResponsesForSamePathButDifferentQueryString_NoMultipleResponsesExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.RespondTo("/api/hello?foo=bar");
@@ -68,7 +68,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenTwoResponsesForSamePathAndQueryStringAndMethod_MultipleResponsesExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.RespondTo(HttpMethod.Get, "/api/hello?foo=bar");
@@ -82,7 +82,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         [Fact]
         public void GivenTwoResponsesForSamePathAndQueryStringButDifferentMethod_NoMultipleResponsesExceptionIsThrown()
         {
-            var handler = new MessageHandler();
+            var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
 
             handler.RespondTo(HttpMethod.Get, "/api/hello?foo=bar");

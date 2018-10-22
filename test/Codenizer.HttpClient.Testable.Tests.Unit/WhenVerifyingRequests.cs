@@ -8,12 +8,12 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 {
     public class WhenVerifyingRequests
     {
-        private MessageHandler _handler;
+        private TestableMessageHandler _handler;
         private System.Net.Http.HttpClient _client;
 
         public WhenVerifyingRequests()
         {
-            _handler = new MessageHandler();
+            _handler = new TestableMessageHandler();
             _client = new System.Net.Http.HttpClient(_handler);
             _client.BaseAddress = new System.Uri("https://tempuri.org/");
 
@@ -77,7 +77,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Single()
                 .GetData()
                 .Should()
-                .Be(content);
+                .BeEquivalentTo(content);
         }
     }
 }

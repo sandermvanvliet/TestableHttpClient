@@ -71,7 +71,7 @@ and for us to start changing the implementation to handle that?
 We will need to intercept the calls made by the `HttpClient`:
 
 ```csharp
-var messageHandler = new Codenizer.HttpClient.Testable.MessageHandler();
+var messageHandler = new Codenizer.HttpClient.Testable.TestableMessageHandler();
 var httpClient = new HttpClient(messageHandler) { BaseAddress = new Uri("http://localhost:5000") };
 var infoClient = new InfoApiClient(httpClient);
 ```
@@ -97,7 +97,7 @@ Our test now looks like:
 [Fact]
 public void GivenApiReturns404_SorryNoContentIsReturned_Step3()
 {
-    var messageHandler = new Codenizer.HttpClient.Testable.MessageHandler();
+    var messageHandler = new Codenizer.HttpClient.Testable.TestableMessageHandler();
     var httpClient = new System.Net.Http.HttpClient(messageHandler) { BaseAddress = new Uri("http://localhost:5000") };
     var infoClient = new InfoApiClient(httpClient);
     
