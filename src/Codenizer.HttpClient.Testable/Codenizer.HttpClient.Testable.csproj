@@ -3,5 +3,23 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+  
+  <PropertyGroup>
+
+    <IsPackable>true</IsPackable>
+    <Version>0.1.0</Version>
+    <Title>Codenizer.HttpClient.Testable</Title>
+    <Description>An easy way to test HttpClient interactions</Description>
+    <Copyright>2018 Sander van Vliet</Copyright>
+    <Authors>Sander van Vliet</Authors>
+    <PackageProjectUrl>https://github.com/sandermvanvliet/TestableHttpClient/</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/sandermvanvliet/TestableHttpClient/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/sandermvanvliet/TestableHttpClient/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+  </PropertyGroup>
 
 </Project>
