@@ -26,7 +26,9 @@ namespace Codenizer.HttpClient.Testable
                 throw _exceptionToThrow;
             }
 
-            var matches = _configuredRequests.Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && r.Method == request.Method);
+            var matches = _configuredRequests
+                .Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && r.Method == request.Method)
+                .ToList();
 
             if(!matches.Any())
             {
@@ -36,9 +38,9 @@ namespace Codenizer.HttpClient.Testable
                 });
             }
             
-            if(matches.Count() > 1)
+            if(matches.Count > 1)
             {
-                throw new MultipleResponsesConfiguredException(matches.Count(), request.RequestUri.PathAndQuery);
+                throw new MultipleResponsesConfiguredException(matches.Count, request.RequestUri.PathAndQuery);
             }
 
             var responseBuilder = matches.Single();
@@ -51,6 +53,11 @@ namespace Codenizer.HttpClient.Testable
             if (responseBuilder.Data != null)
             {
                 response.Content = new StringContent(responseBuilder.Data, Encoding.UTF8, responseBuilder.MediaType);
+            }
+
+            foreach (var header in responseBuilder.Headers)
+            {
+                response.Headers.Add(header.Key, header.Value);
             }
 
             return Task.FromResult(response);

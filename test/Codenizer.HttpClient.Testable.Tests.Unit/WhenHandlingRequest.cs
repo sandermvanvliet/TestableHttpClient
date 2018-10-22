@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
 using FluentAssertions;
@@ -25,7 +25,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be(HttpStatusCode.OK);
         }
-        
+
         [Fact]
         public async void GivenConfiguredResponseBody_ResponseContainsBody()
         {
@@ -46,7 +46,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be("data");
         }
-        
+
         [Fact]
         public async void GivenResponseMediaTypeIsApplicationJson_ContentTypeIsSetWithCharsetOption()
         {
@@ -66,6 +66,28 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .ContentType
                 .Should()
                 .Be(new MediaTypeHeaderValue("application/json") {CharSet = "utf-8"});
+        }
+
+        [Fact]
+        public async void GivenResponseHeaderConfigured_ResponseContainsHeader()
+        {
+            var handler = new MessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo("/api/hello?foo=bar")
+                .With(HttpStatusCode.NoContent)
+                .AndHeaders(new Dictionary<string, string>
+                {
+                    {"Test-Header", "SomeValue"}
+                });
+
+            var response = await client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+
+            response
+                .Headers
+                .Should()
+                .Contain(header => header.Key == "Test-Header");
         }
     }
 }
