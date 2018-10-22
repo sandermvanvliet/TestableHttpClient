@@ -2,6 +2,12 @@
 
 A package to help you test the usage of HttpClient in your applications.
 
+Most people would call this a stub, a double or a mock and they are probably right. This was written to be an easy way to have your code
+interact with a `HttpClient` that just works instead of having to create wrappers around it.
+
+It supports setting up various behaviours to responses it receives (actual: that are sent by the `HttpClient`) and allows you to assert that
+calls are made and to verify the properties of those requests.
+
 ## Usage
 
 To include this package in your applications, add the NuGet package:
@@ -189,3 +195,16 @@ AndHeaders(Dictionary<string, string> headers)
 
 If you need specific HTTP headers on the response you can add them using this method.
 This method can be called multiple times but be aware that it will append values to existing header names.
+
+### Verifying requests have been made
+
+The handler exposes a `Requests` property that contains all requests made to the handler. You can use [FluentAssertions](https://github.com/fluentassertions/fluentassertions/) to assert the properties of the requests.
+
+For example:
+
+```csharp
+_handler
+    .Requests
+    .Should()
+    .Contain(req => req.RequestUri.PathAndQuery == "/api/info");
+```
