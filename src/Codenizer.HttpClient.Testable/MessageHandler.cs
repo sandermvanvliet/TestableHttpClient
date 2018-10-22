@@ -14,6 +14,8 @@ namespace Codenizer.HttpClient.Testable
         private readonly List<RequestBuilder> _configuredRequests;
         private Exception _exceptionToThrow;
 
+        public List<HttpRequestMessage> Requests { get; } = new List<HttpRequestMessage>();
+
         public MessageHandler()
         {
             _configuredRequests = new List<RequestBuilder>();
@@ -25,6 +27,8 @@ namespace Codenizer.HttpClient.Testable
             {
                 throw _exceptionToThrow;
             }
+
+            Requests.Add(request);
 
             var matches = _configuredRequests
                 .Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && r.Method == request.Method)
