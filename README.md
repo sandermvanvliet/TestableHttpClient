@@ -193,8 +193,36 @@ The handler will not serialize the data itself because it does not know about th
 AndHeaders(Dictionary<string, string> headers)
 ```
 
+For example:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndContent("application/json", serializedJson)
+    .AndHeaders(new Dictionary<string, string>
+                {
+                    {"Test-Header", "SomeValue"}
+                });
+```
+
 If you need specific HTTP headers on the response you can add them using this method.
 This method can be called multiple times but be aware that it will append values to existing header names.
+
+### Delaying responses
+
+Let's say you want to test timeouts in your code, it would be useful to have the handler simulate that a request takes some time to process.
+With `Taking(TimeSpan time)` you can do that:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndContent("application/json", serializedJson)
+    .Taking(TimeSpan.FromMilliseconds(100));
+```
+
+This will make the handler delay for 100ms before returning the response you've configured. You do not necissarily need to define content first, `Taking()` can be applied to `With()` directly.
 
 ### Verifying requests have been made
 

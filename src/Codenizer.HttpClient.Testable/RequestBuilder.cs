@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
-    public class RequestBuilder
+    public class RequestBuilder : IRequestBuilder, IResponseBuilder
     {
         public RequestBuilder(HttpMethod method, string pathAndQuery)
         {
@@ -18,14 +19,15 @@ namespace Codenizer.HttpClient.Testable
         public string Data { get; private set; }
         public string MediaType { get; private set; }
         public Dictionary<string, string> Headers { get; } = new Dictionary<string, string>();
+        public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
 
-        public RequestBuilder With(HttpStatusCode httpStatusCode)
+        public IResponseBuilder With(HttpStatusCode httpStatusCode)
         {
             StatusCode = httpStatusCode;
             return this;
         }
 
-        public RequestBuilder AndContent(string mimeType, string data)
+        public IResponseBuilder AndContent(string mimeType, string data)
         {
             MediaType = mimeType;
             Data = data;
@@ -33,7 +35,7 @@ namespace Codenizer.HttpClient.Testable
             return this;
         }
 
-        public RequestBuilder AndHeaders(Dictionary<string, string> headers)
+        public IResponseBuilder AndHeaders(Dictionary<string, string> headers)
         {
             foreach (var header in headers)
             {
@@ -49,5 +51,24 @@ namespace Codenizer.HttpClient.Testable
             
             return this;
         }
+
+        public IResponseBuilder Taking(TimeSpan time)
+        {
+            Duration = time;
+
+            return this;
+        }
+    }
+
+    public interface IRequestBuilder
+    {
+        IResponseBuilder With(HttpStatusCode httpStatusCode);
+    }
+
+    public interface IResponseBuilder
+    {
+        IResponseBuilder AndContent(string mimeType, string data);
+        IResponseBuilder AndHeaders(Dictionary<string, string> headers);
+        IResponseBuilder Taking(TimeSpan time);
     }
 }

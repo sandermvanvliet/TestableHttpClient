@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using FluentAssertions;
@@ -88,6 +90,33 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Headers
                 .Should()
                 .Contain(header => header.Key == "Test-Header");
+        }
+
+        [Fact]
+        public async void GivenResponseDurationConfigured_ResponseTakesAtLeastDuration()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo("/api/hello?foo=bar")
+                .With(HttpStatusCode.NoContent)
+                .AndHeaders(new Dictionary<string, string>
+                {
+                    {"Test-Header", "SomeValue"}
+                })
+                .Taking(TimeSpan.FromMilliseconds(100));
+
+            var stopwatch = Stopwatch.StartNew();
+
+            await client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+
+            stopwatch.Stop();
+
+            stopwatch
+                .ElapsedMilliseconds
+                .Should()
+                .BeGreaterOrEqualTo(100);
         }
     }
 }
