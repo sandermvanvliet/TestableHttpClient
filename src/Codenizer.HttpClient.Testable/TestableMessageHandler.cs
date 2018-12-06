@@ -64,15 +64,23 @@ namespace Codenizer.HttpClient.Testable
                 response.Headers.Add(header.Key, header.Value);
             }
 
+            if (responseBuilder.Duration > TimeSpan.Zero)
+            {
+                Task
+                    .Delay(responseBuilder.Duration, cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+
             return Task.FromResult(response);
         }
 
-        public RequestBuilder RespondTo(string pathAndQuery)
+        public IRequestBuilder RespondTo(string pathAndQuery)
         {
             return RespondTo(HttpMethod.Get, pathAndQuery);
         }
 
-        public RequestBuilder RespondTo(HttpMethod method, string pathAndQuery)
+        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery)
         {
             var requestBuilder = new RequestBuilder(method, pathAndQuery);
             
