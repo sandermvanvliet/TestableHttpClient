@@ -145,15 +145,13 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         {
             var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
-            var wasCalled = false;
 
             handler
                 .RespondTo(
                     HttpMethod.Put,
                     "/api/hello?foo=bar",
                     "application/json")
-                .With(HttpStatusCode.NoContent)
-                .WhenCalled(request => wasCalled = true);
+                .With(HttpStatusCode.NoContent);
 
             var response = await client.PutAsync("https://tempuri.org/api/hello?foo=bar", new StringContent("foo", Encoding.ASCII,"text/plain"));
 
