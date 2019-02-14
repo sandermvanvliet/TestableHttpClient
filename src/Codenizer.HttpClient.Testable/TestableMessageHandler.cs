@@ -49,6 +49,8 @@ namespace Codenizer.HttpClient.Testable
 
             var responseBuilder = matches.Single();
 
+            responseBuilder.ActionWhenCalled?.Invoke(request);
+
             var response = new HttpResponseMessage
             {
                 StatusCode = responseBuilder.StatusCode

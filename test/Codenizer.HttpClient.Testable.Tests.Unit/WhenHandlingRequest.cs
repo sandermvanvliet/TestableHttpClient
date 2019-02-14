@@ -118,5 +118,24 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .BeGreaterOrEqualTo(100);
         }
+
+        [Fact]
+        public async void GivenWhenCalledActionConfigured_ActionIsCalledWhenRequestIsMade()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+            var wasCalled = false;
+
+            handler
+                .RespondTo("/api/hello?foo=bar")
+                .With(HttpStatusCode.NoContent)
+                .WhenCalled(request => wasCalled = true);
+
+            await client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+
+            wasCalled
+                .Should()
+                .BeTrue();
+        }
     }
 }
