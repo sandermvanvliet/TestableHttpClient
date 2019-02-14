@@ -31,7 +31,8 @@ namespace Codenizer.HttpClient.Testable
             Requests.Add(request);
 
             var matches = _configuredRequests
-                .Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && r.Method == request.Method)
+                .Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && 
+                            r.Method == request.Method)
                 .ToList();
 
             if(!matches.Any())
@@ -48,6 +49,21 @@ namespace Codenizer.HttpClient.Testable
             }
 
             var responseBuilder = matches.Single();
+
+            if (!string.IsNullOrWhiteSpace(responseBuilder.ContentType))
+            {
+                var requestContentType = request.Content.Headers.ContentType.MediaType;
+
+                if (requestContentType != responseBuilder.ContentType)
+                {
+                    return Task.FromResult(new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.UnsupportedMediaType
+                    });
+                }
+            }
+
+            responseBuilder.ActionWhenCalled?.Invoke(request);
 
             var response = new HttpResponseMessage
             {
@@ -82,10 +98,15 @@ namespace Codenizer.HttpClient.Testable
 
         public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery)
         {
-            var requestBuilder = new RequestBuilder(method, pathAndQuery);
-            
+            return RespondTo(method, pathAndQuery, null);
+        }
+
+        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string contentType)
+        {
+            var requestBuilder = new RequestBuilder(method, pathAndQuery, contentType);
+
             _configuredRequests.Add(requestBuilder);
-            
+
             return requestBuilder;
         }
 

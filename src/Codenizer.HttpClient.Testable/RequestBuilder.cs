@@ -7,19 +7,22 @@ namespace Codenizer.HttpClient.Testable
 {
     public class RequestBuilder : IRequestBuilder, IResponseBuilder
     {
-        public RequestBuilder(HttpMethod method, string pathAndQuery)
+        public RequestBuilder(HttpMethod method, string pathAndQuery, string contentType)
         {
             Method = method;
             PathAndQuery = pathAndQuery;
+            ContentType = contentType;
         }
 
         public string PathAndQuery { get; }
+        public string ContentType { get; }
         public HttpStatusCode StatusCode { get; private set; } = HttpStatusCode.InternalServerError;
         public HttpMethod Method { get; }
         public string Data { get; private set; }
         public string MediaType { get; private set; }
         public Dictionary<string, string> Headers { get; } = new Dictionary<string, string>();
         public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
+        public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
 
         public IResponseBuilder With(HttpStatusCode httpStatusCode)
         {
@@ -58,6 +61,13 @@ namespace Codenizer.HttpClient.Testable
 
             return this;
         }
+
+        public IResponseBuilder WhenCalled(Action<HttpRequestMessage> action)
+        {
+            ActionWhenCalled = action;
+
+            return this;
+        }
     }
 
     public interface IRequestBuilder
@@ -70,5 +80,6 @@ namespace Codenizer.HttpClient.Testable
         IResponseBuilder AndContent(string mimeType, string data);
         IResponseBuilder AndHeaders(Dictionary<string, string> headers);
         IResponseBuilder Taking(TimeSpan time);
+        IResponseBuilder WhenCalled(Action<HttpRequestMessage> action);
     }
 }

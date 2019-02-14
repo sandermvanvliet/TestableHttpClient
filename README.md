@@ -224,6 +224,25 @@ handler
 
 This will make the handler delay for 100ms before returning the response you've configured. You do not necissarily need to define content first, `Taking()` can be applied to `With()` directly.
 
+### Handle requests only if they match a content type
+
+You may want to configure a response only if the request has a specific `Content-Type`, for example on `PUT` or `POST` endpoints that require `application/json`.
+As of version `0.4.0` you can now do that like so:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Post, "/api/infos/", "application/json")
+    .With(HttpStatus.Created);
+```
+
+If you make a request with a content type of `text/plain`:
+
+```csharp
+await httpClient.PostAsync("/api/infos", new StringContent("test", Encoding.ASCII, "text/plain"));
+```
+
+the response returned from the handler will be `415 Unsupported Media Type`
+
 ### Verifying requests have been made
 
 The handler exposes a `Requests` property that contains all requests made to the handler. You can use [FluentAssertions](https://github.com/fluentassertions/fluentassertions/) to assert the properties of the requests.
@@ -236,3 +255,19 @@ _handler
     .Should()
     .Contain(req => req.RequestUri.PathAndQuery == "/api/info");
 ```
+
+### Callback when request is made
+
+For some cases it may be useful to have a callback when the request is handled by the testable handler. You can use `WhenCalled` to register one:
+
+```csharp
+var wasCalled = false;
+
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndContent("application/json", serializedJson)
+    .WhenCalled(request => wasCalled = true);
+```
+
+When you make a request to `/api/info/latest` the `wasCalled` variable will now be set to `true`.
