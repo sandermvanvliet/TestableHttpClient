@@ -7,13 +7,15 @@ namespace Codenizer.HttpClient.Testable
 {
     public class RequestBuilder : IRequestBuilder, IResponseBuilder
     {
-        public RequestBuilder(HttpMethod method, string pathAndQuery)
+        public RequestBuilder(HttpMethod method, string pathAndQuery, string contentType)
         {
             Method = method;
             PathAndQuery = pathAndQuery;
+            ContentType = contentType;
         }
 
         public string PathAndQuery { get; }
+        public string ContentType { get; }
         public HttpStatusCode StatusCode { get; private set; } = HttpStatusCode.InternalServerError;
         public HttpMethod Method { get; }
         public string Data { get; private set; }
