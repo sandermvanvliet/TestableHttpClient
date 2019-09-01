@@ -21,7 +21,7 @@ namespace Codenizer.HttpClient.Testable
             _configuredRequests = new List<RequestBuilder>();
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if(_exceptionToThrow != null)
             {
@@ -37,10 +37,10 @@ namespace Codenizer.HttpClient.Testable
 
             if(!matches.Any())
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError)
                 {
                     Content = new StringContent($"No response configured for {request.RequestUri.PathAndQuery}")
-                });
+                };
             }
             
             if(matches.Count > 1)
@@ -56,10 +56,10 @@ namespace Codenizer.HttpClient.Testable
 
                 if (requestContentType != responseBuilder.ContentType)
                 {
-                    return Task.FromResult(new HttpResponseMessage
+                    return new HttpResponseMessage
                     {
                         StatusCode = HttpStatusCode.UnsupportedMediaType
-                    });
+                    };
                 }
             }
 
@@ -82,13 +82,10 @@ namespace Codenizer.HttpClient.Testable
 
             if (responseBuilder.Duration > TimeSpan.Zero)
             {
-                Task
-                    .Delay(responseBuilder.Duration, cancellationToken)
-                    .GetAwaiter()
-                    .GetResult();
+                await Task.Delay(responseBuilder.Duration, cancellationToken);
             }
 
-            return Task.FromResult(response);
+            return response;
         }
 
         public IRequestBuilder RespondTo(string pathAndQuery)
