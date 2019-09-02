@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -159,6 +160,25 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .StatusCode
                 .Should()
                 .Be(HttpStatusCode.UnsupportedMediaType);
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredWithRouteParameters_RequestIsHandled()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.OK);
         }
     }
 }

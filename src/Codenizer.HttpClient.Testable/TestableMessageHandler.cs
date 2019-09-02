@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -30,25 +29,21 @@ namespace Codenizer.HttpClient.Testable
 
             Requests.Add(request);
 
-            var matches = _configuredRequests
-                .Where(r => r.PathAndQuery == request.RequestUri.PathAndQuery && 
-                            r.Method == request.Method)
-                .ToList();
+            var match = RouteDictionary
+                .From(_configuredRequests)
+                .Match(
+                    request.Method,
+                    request.RequestUri.PathAndQuery);
 
-            if(!matches.Any())
+            if(match == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError)
                 {
                     Content = new StringContent($"No response configured for {request.RequestUri.PathAndQuery}")
                 };
             }
-            
-            if(matches.Count > 1)
-            {
-                throw new MultipleResponsesConfiguredException(matches.Count, request.RequestUri.PathAndQuery);
-            }
 
-            var responseBuilder = matches.Single();
+            var responseBuilder = match;
 
             if (!string.IsNullOrWhiteSpace(responseBuilder.ContentType))
             {

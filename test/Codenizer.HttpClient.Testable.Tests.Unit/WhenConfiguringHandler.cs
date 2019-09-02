@@ -15,7 +15,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             handler.ShouldThrow(new Exception("BANG"));
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello").GetAwaiter().GetResult();
 
             action
                 .Should()
@@ -32,7 +32,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler.RespondTo("/api/hello");
             handler.RespondTo("/api/hello");
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello").GetAwaiter().GetResult();
 
             action.Should().Throw<MultipleResponsesConfiguredException>();
         }
@@ -46,7 +46,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler.RespondTo("/api/hello?foo=bar");
             handler.RespondTo("/api/hello?foo=bar");
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar").GetAwaiter().GetResult();
 
             action.Should().Throw<MultipleResponsesConfiguredException>();
         }
@@ -60,7 +60,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler.RespondTo("/api/hello?foo=bar");
             handler.RespondTo("/api/hello?foo=qux");
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar").GetAwaiter().GetResult();
 
             action.Should().NotThrow<MultipleResponsesConfiguredException>();
         }
@@ -74,7 +74,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler.RespondTo(HttpMethod.Get, "/api/hello?foo=bar");
             handler.RespondTo(HttpMethod.Get, "/api/hello?foo=bar");
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar").GetAwaiter().GetResult();
 
             action.Should().Throw<MultipleResponsesConfiguredException>();
         }
@@ -88,7 +88,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler.RespondTo(HttpMethod.Get, "/api/hello?foo=bar");
             handler.RespondTo(HttpMethod.Post, "/api/hello?foo=bar");
 
-            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar");
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar").GetAwaiter().GetResult();
 
             action.Should().NotThrow<MultipleResponsesConfiguredException>();
         }
