@@ -161,6 +161,12 @@ This method allows you to specify the relative part of the URI and the applicabl
 against the entire path and query string including the HTTP method. If multiple responses are configured against the same URL
 a `MultipleResponsesConfigureException` will be thrown.
 
+Since version `0.5.0` you can configure an endpoint with route parameters.  
+Let's say you want to configure an endpoint that retrieves editions of a book 
+(for example: `/api/books/56789/editions`) and it doesn't quite matter which `id` the book has you can now define the endpoint as `/api/books/{id}/editions`. The handler will match the request to that configured response without knowing the specific `id` in advance.
+
+**NOTE:** There is one case that currently breaks: if you do `/api/entity/{id}?foo=bar` then the handler will not match the response correctly.
+
 ### Setting the response code
 
 ```csharp
@@ -250,7 +256,7 @@ The handler exposes a `Requests` property that contains all requests made to the
 For example:
 
 ```csharp
-_handler
+handler
     .Requests
     .Should()
     .Contain(req => req.RequestUri.PathAndQuery == "/api/info");
