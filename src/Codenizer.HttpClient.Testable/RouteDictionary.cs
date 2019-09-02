@@ -7,14 +7,16 @@ namespace Codenizer.HttpClient.Testable
 {
     public class RouteDictionary
     {
+        public Dictionary<string, RouteSegment> RootSegments = new Dictionary<string, RouteSegment>();
+
         public static RouteDictionary From(List<RequestBuilder> routes)
         {
             var routeDictionary = new RouteDictionary();
-            
+
             foreach (var route in routes)
             {
                 RouteSegment pointer;
-                
+
                 var routeParts = PathAndQueryToSegments(route.PathAndQuery);
 
                 if (routeDictionary.RootSegments.ContainsKey(routeParts[0]))
@@ -33,13 +35,10 @@ namespace Codenizer.HttpClient.Testable
 
                     if (pointer.Segments.ContainsKey(part))
                     {
-                        if(index == routeParts.Length -1)
+                        if (index == routeParts.Length - 1)
                         {
-
                             if (pointer.Segments[part].RequestBuilders.ContainsKey(route.Method))
-                            {
                                 throw new MultipleResponsesConfiguredException(2, route.PathAndQuery);
-                            }
 
                             pointer.Segments[part].RequestBuilders.Add(route.Method, route);
                             break;
@@ -53,17 +52,12 @@ namespace Codenizer.HttpClient.Testable
                     pointer.Segments.Add(part, segment);
                     pointer = segment;
 
-                    if (index == routeParts.Length - 1)
-                    {
-                        pointer.RequestBuilders.Add(route.Method, route);
-                    }
+                    if (index == routeParts.Length - 1) pointer.RequestBuilders.Add(route.Method, route);
                 }
             }
 
             return routeDictionary;
         }
-
-        public Dictionary<string, RouteSegment> RootSegments = new Dictionary<string, RouteSegment>();
 
         public RequestBuilder Match(HttpMethod method, string pathAndQuery)
         {
@@ -72,28 +66,21 @@ namespace Codenizer.HttpClient.Testable
             RouteSegment pointer = null;
 
             foreach (var segment in segments)
-            {
                 if (pointer == null)
                 {
-                    if (!RootSegments.ContainsKey(segments[0]))
-                    {
-                        return null;
-                    }
+                    if (!RootSegments.ContainsKey(segments[0])) return null;
 
                     pointer = RootSegments[segment];
                 }
                 else
                 {
-                    if(!pointer.Segments.ContainsKey(segment))
+                    if (!pointer.Segments.ContainsKey(segment))
                     {
                         if (pointer.Segments.Any())
                         {
                             var first = pointer.Segments.Keys.First();
 
-                            if (IsParameter(first))
-                            {
-                                pointer = pointer.Segments[first];
-                            }
+                            if (IsParameter(first)) pointer = pointer.Segments[first];
                         }
                         else
                         {
@@ -105,12 +92,8 @@ namespace Codenizer.HttpClient.Testable
                         pointer = pointer.Segments[segment];
                     }
                 }
-            }
 
-            if (pointer != null && pointer.RequestBuilders.ContainsKey(method))
-            {
-                return pointer.RequestBuilders[method];
-            }
+            if (pointer != null && pointer.RequestBuilders.ContainsKey(method)) return pointer.RequestBuilders[method];
 
             return null;
         }
