@@ -12,6 +12,14 @@ namespace Codenizer.HttpClient.Testable
             Method = method;
             PathAndQuery = pathAndQuery;
             ContentType = contentType;
+
+            RouteParameters = ParseRouteParametersFromPathAndQuery(pathAndQuery);
+        }
+
+        private List<string> ParseRouteParametersFromPathAndQuery(string pathAndQuery)
+        {
+            
+            return new List<string>();
         }
 
         public string PathAndQuery { get; }
@@ -23,6 +31,7 @@ namespace Codenizer.HttpClient.Testable
         public Dictionary<string, string> Headers { get; } = new Dictionary<string, string>();
         public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
         public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
+        public List<string> RouteParameters { get; private set; }
 
         public IResponseBuilder With(HttpStatusCode httpStatusCode)
         {

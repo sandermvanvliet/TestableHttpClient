@@ -8,17 +8,23 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 {
     public class WhenVerifyingRequests
     {
-        private TestableMessageHandler _handler;
-        private System.Net.Http.HttpClient _client;
+        private readonly TestableMessageHandler _handler;
+        private readonly System.Net.Http.HttpClient _client;
 
         public WhenVerifyingRequests()
         {
             _handler = new TestableMessageHandler();
-            _client = new System.Net.Http.HttpClient(_handler);
-            _client.BaseAddress = new System.Uri("https://tempuri.org/");
+            _client = new System.Net.Http.HttpClient(_handler)
+            {
+                BaseAddress = new System.Uri("https://tempuri.org/")
+            };
 
             _handler
                 .RespondTo(HttpMethod.Get, "/api/info")
+                .With(HttpStatusCode.OK);
+
+            _handler
+                .RespondTo(HttpMethod.Post, "/api/info")
                 .With(HttpStatusCode.OK);
         }
 
