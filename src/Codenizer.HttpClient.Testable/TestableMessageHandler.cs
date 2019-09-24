@@ -22,12 +22,12 @@ namespace Codenizer.HttpClient.Testable
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if(_exceptionToThrow != null)
+            Requests.Add(request);
+
+            if (_exceptionToThrow != null)
             {
                 throw _exceptionToThrow;
             }
-
-            Requests.Add(request);
 
             var match = RouteDictionary
                 .From(_configuredRequests)
