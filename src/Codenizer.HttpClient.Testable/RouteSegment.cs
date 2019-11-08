@@ -3,7 +3,7 @@ using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
-    public class RouteSegment
+    internal class RouteSegment
     {
         public string Part { get; }
         public Dictionary<string, RouteSegment> Segments { get; } = new Dictionary<string, RouteSegment>();

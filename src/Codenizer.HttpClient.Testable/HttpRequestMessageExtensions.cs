@@ -4,6 +4,11 @@ namespace Codenizer.HttpClient.Testable
 {
     public static class HttpRequestMessageExtensions
     {
+        /// <summary>
+        /// Get the data if any from the captured request
+        /// </summary>
+        /// <param name="request">The captured request</param>
+        /// <returns>Either the <c>string</c>, <c>byte</c> array or <c>null</c> that is the content of the request</returns>
         public static object GetData(this HttpRequestMessage request)
         {
             switch (request.Content)
