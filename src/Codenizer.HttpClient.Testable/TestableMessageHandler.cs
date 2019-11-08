@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -14,6 +15,8 @@ namespace Codenizer.HttpClient.Testable
         private Exception _exceptionToThrow;
 
         public List<HttpRequestMessage> Requests { get; } = new List<HttpRequestMessage>();
+
+        public ReadOnlyCollection<RequestBuilder> ConfiguredResponses => _configuredRequests.AsReadOnly();
 
         public TestableMessageHandler()
         {
@@ -105,6 +108,11 @@ namespace Codenizer.HttpClient.Testable
         public void ShouldThrow(Exception exception)
         {
             _exceptionToThrow = exception;
+        }
+        
+        public void ClearConfiguredResponses()
+        {
+            _configuredRequests.Clear();
         }
     }
 }
