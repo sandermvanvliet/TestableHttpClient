@@ -22,4 +22,12 @@
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\git\TestableHttpClient\src\Codenizer.HttpClient.Testable\Codenizer.HttpClient.Testable.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\git\TestableHttpClient\src\Codenizer.HttpClient.Testable\Codenizer.HttpClient.Testable.xml</DocumentationFile>
+  </PropertyGroup>
+
 </Project>
