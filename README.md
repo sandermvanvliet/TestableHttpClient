@@ -6,6 +6,8 @@ A package to help you test the usage of HttpClient in your applications.
 [![Build status](https://ci.appveyor.com/api/projects/status/xiqdlv0g1r3xrufv?svg=true)](https://ci.appveyor.com/project/sandermvanvliet/testablehttpclient)
 [![Codenizer.HttpClient.Testable](https://buildstats.info/nuget/Codenizer.HttpClient.Testable)](https://www.nuget.org/packages/Codenizer.HttpClient.Testable/)
 
+Proudly built with [NCrunch](https://www.ncrunch.net).
+
 ## Introduction
 
 Most people would call this a stub, a double or a mock and they are probably right. This was written to be an easy way to have your code
