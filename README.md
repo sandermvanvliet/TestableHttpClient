@@ -268,6 +268,26 @@ handler
     .Contain(req => req.RequestUri.PathAndQuery == "/api/info");
 ```
 
+Additionally you can verify the content of the request using the `GetData()` extension method like so:
+
+```csharp
+// Configure the response
+handler
+    .RespondTo(HttpMethod.Post, "/api/info")
+    .With(HttpStatusCode.Created);
+
+// Call the endpoint
+await httpClient.PostAsync("/api/info", new StringContent("{\"foo\":\"bar\"}"));
+
+// Check the request content
+var serializedContent = handler
+    .Requests
+    .Single(req => req.RequestUri.PathAndQuery == "/api/info")
+    .GetData()
+    .Should()
+    .Be("{\"foo\":\"bar\"}");
+```
+
 ### Callback when request is made
 
 For some cases it may be useful to have a callback when the request is handled by the testable handler. You can use `WhenCalled` to register one:
@@ -283,3 +303,8 @@ handler
 ```
 
 When you make a request to `/api/info/latest` the `wasCalled` variable will now be set to `true`.
+
+### Reset the handler
+
+In situations where you need to reset the configured responses and you can't create a new instance easily you can now use the `ClearConfiguredResponses()` method.
+This will remove any configured response from the handler which allows you to configure new ones.
