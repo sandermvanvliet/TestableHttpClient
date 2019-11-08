@@ -6,33 +6,23 @@ namespace Codenizer.HttpClient.Testable
     {
         public static object GetData(this HttpRequestMessage request)
         {
-            if(request.Content == null)
+            switch (request.Content)
             {
-                return null;
+                case null:
+                    return null;
+                case StringContent stringContent:
+                    return stringContent
+                        .ReadAsStringAsync()
+                        .GetAwaiter()
+                        .GetResult();
+                case ByteArrayContent byteContent:
+                    return byteContent
+                        .ReadAsByteArrayAsync()
+                        .GetAwaiter()
+                        .GetResult();
+                default:
+                    return null;
             }
-
-            if(request.Content is StringContent)
-            {
-                var stringContent = request.Content as StringContent;
-
-                var task = stringContent.ReadAsStringAsync();
-                
-                task.Wait();
-
-                return task.Result;
-            }
-            if(request.Content is ByteArrayContent)
-            {
-                var byteContent = request.Content as ByteArrayContent;
-
-                var task = byteContent.ReadAsByteArrayAsync();
-
-                task.Wait();
-
-                return task.Result;
-            }
-
-            return null;
         }
     }
 }
