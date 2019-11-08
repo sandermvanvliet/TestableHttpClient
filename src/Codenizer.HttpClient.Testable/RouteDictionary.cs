@@ -19,7 +19,11 @@ namespace Codenizer.HttpClient.Testable
 
                 var routeParts = PathAndQueryToSegments(route.PathAndQuery);
 
-                if (routeDictionary.RootSegments.ContainsKey(routeParts[0]))
+                if (!routeParts.Any())
+                {
+                    pointer = new RouteSegment("/");
+                }
+                else if (routeDictionary.RootSegments.ContainsKey(routeParts[0]))
                 {
                     pointer = routeDictionary.RootSegments[routeParts[0]];
                 }
