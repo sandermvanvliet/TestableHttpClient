@@ -5,11 +5,11 @@ using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
-    public class RouteDictionary
+    internal class RouteDictionary
     {
-        public Dictionary<string, RouteSegment> RootSegments = new Dictionary<string, RouteSegment>();
+        internal Dictionary<string, RouteSegment> RootSegments = new Dictionary<string, RouteSegment>();
 
-        public static RouteDictionary From(List<RequestBuilder> routes)
+        internal static RouteDictionary From(List<RequestBuilder> routes)
         {
             var routeDictionary = new RouteDictionary();
 
@@ -19,7 +19,11 @@ namespace Codenizer.HttpClient.Testable
 
                 var routeParts = PathAndQueryToSegments(route.PathAndQuery);
 
-                if (routeDictionary.RootSegments.ContainsKey(routeParts[0]))
+                if (!routeParts.Any())
+                {
+                    pointer = new RouteSegment("/");
+                }
+                else if (routeDictionary.RootSegments.ContainsKey(routeParts[0]))
                 {
                     pointer = routeDictionary.RootSegments[routeParts[0]];
                 }
@@ -59,7 +63,7 @@ namespace Codenizer.HttpClient.Testable
             return routeDictionary;
         }
 
-        public RequestBuilder Match(HttpMethod method, string pathAndQuery)
+        internal RequestBuilder Match(HttpMethod method, string pathAndQuery)
         {
             var segments = PathAndQueryToSegments(pathAndQuery);
 
