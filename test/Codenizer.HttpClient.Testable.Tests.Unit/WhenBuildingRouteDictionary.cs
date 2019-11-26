@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using FluentAssertions;
 using Xunit;
@@ -61,6 +63,25 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Segments["foo"]
                 .Segments["bar?blah=blurb"]
                 .RequestBuilders[HttpMethod.Get]
+                .Should()
+                .Be(requestBuilder);
+        }
+
+        [Fact]
+        public void GivenPathForSingleDocumentAtRoot_RootSegmentContainsRequestBuilder()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Post, "/index.php", null);
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .RootSegments["index.php"]
+                .RequestBuilders[HttpMethod.Post]
                 .Should()
                 .Be(requestBuilder);
         }
