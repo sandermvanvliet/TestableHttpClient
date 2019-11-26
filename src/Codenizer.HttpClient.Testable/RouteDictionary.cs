@@ -56,7 +56,15 @@ namespace Codenizer.HttpClient.Testable
                     pointer.Segments.Add(part, segment);
                     pointer = segment;
 
-                    if (index == routeParts.Length - 1) pointer.RequestBuilders.Add(route.Method, route);
+                    if (index == routeParts.Length - 1)
+                    {
+                        pointer.RequestBuilders.Add(route.Method, route);
+                    }
+                }
+
+                if (routeParts.Length == 1)
+                {
+                    routeDictionary.RootSegments[pointer.Part].RequestBuilders.Add(route.Method, route);
                 }
             }
 
