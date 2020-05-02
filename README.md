@@ -62,13 +62,13 @@ Let's change that and return a string `Sorry, no content` if we get a `404 Not F
 public class WhenRequestingLatestInfo
 {
     [Fact]
-    public void GivenApiReturns404_SorryNoContentIsReturned()
+    public async void GivenApiReturns404_SorryNoContentIsReturned()
     {
         var infoClient = new InfoApiClient(new HttpClient());
         
-        infoClient
-            .GetLatestInfo()
-            .Result
+        var latestInfo = await infoClient.GetLatestInfo();
+
+        latestInfo
             .Should()
             .Be("Sorry, no content");
     }
