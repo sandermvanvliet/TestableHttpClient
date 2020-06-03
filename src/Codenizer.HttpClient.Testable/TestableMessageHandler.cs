@@ -35,6 +35,7 @@ namespace Codenizer.HttpClient.Testable
             _configuredRequests = new List<RequestBuilder>();
         }
 
+        /// <inheritdoc />
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Requests.Add(request);
@@ -88,6 +89,11 @@ namespace Codenizer.HttpClient.Testable
             foreach (var header in responseBuilder.Headers)
             {
                 response.Headers.Add(header.Key, header.Value);
+            }
+
+            foreach (var cookie in responseBuilder.Cookies)
+            {
+                response.Headers.Add("Set-Cookie", cookie);
             }
 
             if (responseBuilder.Duration > TimeSpan.Zero)

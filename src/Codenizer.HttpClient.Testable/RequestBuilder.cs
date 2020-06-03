@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Resources;
+using System.Text;
 
 namespace Codenizer.HttpClient.Testable
 {
@@ -32,6 +35,7 @@ namespace Codenizer.HttpClient.Testable
         public Dictionary<string, string> Headers { get; } = new Dictionary<string, string>();
         public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
         public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
+        public List<string> Cookies { get; } = new List<string>();
 
         /// <summary>
         /// Respond with the given HTTP status code
@@ -77,7 +81,7 @@ namespace Codenizer.HttpClient.Testable
                     Headers.Add(header.Key, header.Value);
                 }
             }
-            
+
             return this;
         }
 
@@ -104,6 +108,59 @@ namespace Codenizer.HttpClient.Testable
 
             return this;
         }
+
+        public IResponseBuilder AndCookie(string name,
+            string value,
+            DateTime? expiresAt = null,
+            string sameSite = null,
+            bool? secure = null,
+            string path = null,
+            string domain = null,
+            int? maxAge = null)
+        {
+            var parameters = new List<string>();
+
+            if (expiresAt != null)
+            {
+                parameters.Add($"Expires={expiresAt:R}");
+            }
+
+            if (!string.IsNullOrEmpty(sameSite))
+            {
+                parameters.Add($"SameSite={sameSite}");
+            }
+
+            if (secure.GetValueOrDefault(false))
+            {
+                parameters.Add("Secure");
+            }
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                parameters.Add($"Path={path}");
+            }
+
+            if (!string.IsNullOrEmpty(domain))
+            {
+                parameters.Add($"Domain={domain}");
+            }
+
+            if (maxAge != null)
+            {
+                parameters.Add($"MaxAge={maxAge.Value}");
+            }
+
+            var cookieString = $"{name}={value}";
+
+            if (parameters.Any())
+            {
+                cookieString += "; " + string.Join(";", parameters);
+            }
+
+            Cookies.Add(cookieString);
+
+            return this;
+        }
     }
 
     public interface IRequestBuilder
@@ -117,5 +174,7 @@ namespace Codenizer.HttpClient.Testable
         IResponseBuilder AndHeaders(Dictionary<string, string> headers);
         IResponseBuilder Taking(TimeSpan time);
         IResponseBuilder WhenCalled(Action<HttpRequestMessage> action);
+        IResponseBuilder AndCookie(string name, string value, DateTime? expiresAt = null, string sameSite = null,
+            bool? secure = null, string path = null, string domain = null, int? maxAge = null);
     }
 }
