@@ -180,5 +180,108 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be(HttpStatusCode.OK);
         }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredWithCookie_SetCookieHeaderIsInResponse()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}")
+                .AndCookie("cookie-name", "cookie-value");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123");
+
+            response
+                .Headers
+                .Should()
+                .Contain(header => header.Key == "Set-Cookie")
+                .Which
+                .Value
+                .First()
+                .Should()
+                .Be("cookie-name=cookie-value");
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredWithCookieThatExpires_SetCookieHeaderIsInResponse()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+            var expiresAt = DateTime.UtcNow.AddHours(1);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}")
+                .AndCookie("cookie-name", "cookie-value", expiresAt);
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123");
+
+            response
+                .Headers
+                .Should()
+                .Contain(header => header.Key == "Set-Cookie")
+                .Which
+                .Value
+                .First()
+                .Should()
+                .Be($"cookie-name=cookie-value; Expires={expiresAt:R}"); // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredWithCookieForDomain_SetCookieHeaderIsInResponse()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+            var expiresAt = DateTime.UtcNow.AddHours(1);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}")
+                .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123");
+
+            response
+                .Headers
+                .Should()
+                .Contain(header => header.Key == "Set-Cookie")
+                .Which
+                .Value
+                .First()
+                .Should()
+                .Be($"cookie-name=cookie-value; Domain=jedlix.com");
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredWithCookieForDomainAndPath_SetCookieHeaderIsInResponse()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+            var expiresAt = DateTime.UtcNow.AddHours(1);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}")
+                .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com", path: "/some/path");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123");
+
+            response
+                .Headers
+                .Should()
+                .Contain(header => header.Key == "Set-Cookie")
+                .Which
+                .Value
+                .First()
+                .Should()
+                .Be($"cookie-name=cookie-value; Path=/some/path;Domain=jedlix.com");
+        }
     }
 }

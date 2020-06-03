@@ -7,10 +7,10 @@
   <PropertyGroup>
 
     <IsPackable>true</IsPackable>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Title>Codenizer.HttpClient.Testable</Title>
     <Description>An easy way to test HttpClient interactions</Description>
-    <Copyright>2019 Sander van Vliet</Copyright>
+    <Copyright>2020 Sander van Vliet</Copyright>
     <Authors>Sander van Vliet</Authors>
     <PackageProjectUrl>https://github.com/sandermvanvliet/TestableHttpClient/</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/sandermvanvliet/TestableHttpClient/LICENSE</PackageLicenseUrl>

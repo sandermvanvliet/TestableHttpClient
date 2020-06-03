@@ -223,6 +223,31 @@ handler
 If you need specific HTTP headers on the response you can add them using this method.
 This method can be called multiple times but be aware that it will append values to existing header names.
 
+### Cookies
+
+If a response should include cookies you can configure the request with the `AndCookie` method:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndContent("application/json", serializedJson)
+    .AndCookie("cookie-name", "cookie-value");
+```
+
+This will add the `Set-Cookie` HTTP header to the response. The `AndCookie` method supports the following parameters:
+
+- `expiresAt`, `DateTme` will only be added to the cookie if this value is not `null`
+- `domain`, `string` will only be added to the cookie if this value is not `null`
+- `path`, `string` will only be added to the cookie if this value is not `null`
+- `secure`, `bool` will only be added to the cookie if this value is `true`
+- `sameSite` (`Lax`, `Strict`, `None`), if left `null` the `SameSite` parameter will not be set on the cookie
+- `maxAge`, `int` will only be added to the cookie if this value is not `null`
+
+See the [MDN article](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie) on the `Set-Cookie` header for more details on valid values.
+
+If `AddCookie` does not suit your specific case you can always use `AddHeaders` and format the `Set-Cookie` header yourself. This can be particularly useful if you want to test malformed cookie responses.
+
 ### Delaying responses
 
 Let's say you want to test timeouts in your code, it would be useful to have the handler simulate that a request takes some time to process.
