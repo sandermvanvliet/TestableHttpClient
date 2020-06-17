@@ -98,7 +98,7 @@ namespace Codenizer.HttpClient.Testable
 
             if (responseBuilder.Duration > TimeSpan.Zero)
             {
-                await Task.Delay(responseBuilder.Duration, cancellationToken);
+                Thread.Sleep((int)responseBuilder.Duration.TotalMilliseconds);
             }
 
             return response;
