@@ -41,10 +41,8 @@ namespace Codenizer.HttpClient.Testable
                     {
                         if (index == routeParts.Length - 1)
                         {
-                            if (pointer.Segments[part].RequestBuilders.ContainsKey(route.Method))
-                                throw new MultipleResponsesConfiguredException(2, route.PathAndQuery);
+                            pointer.Segments[part].Add(route);
 
-                            pointer.Segments[part].RequestBuilders.Add(route.Method, route);
                             break;
                         }
 
@@ -58,13 +56,13 @@ namespace Codenizer.HttpClient.Testable
 
                     if (index == routeParts.Length - 1)
                     {
-                        pointer.RequestBuilders.Add(route.Method, route);
+                        pointer.Add(route);
                     }
                 }
 
                 if (routeParts.Length == 1)
                 {
-                    routeDictionary.RootSegments[pointer.Part].RequestBuilders.Add(route.Method, route);
+                    routeDictionary.RootSegments[pointer.Part].Add(route);
                 }
             }
 
@@ -74,6 +72,24 @@ namespace Codenizer.HttpClient.Testable
         internal RequestBuilder Match(HttpMethod method, string pathAndQuery)
         {
             var segments = PathAndQueryToSegments(pathAndQuery);
+            var queryParameters = new Dictionary<string, string>();
+
+            if (segments.Last().Contains("?"))
+            {
+                var parts = segments.Last().Split('?');
+
+                segments[segments.Length - 1] = parts[0];
+
+                queryParameters = parts[1]
+                    .Split('&')
+                    .Select(p => p.Split('='))
+                    .ToDictionary(p => p[0], p => p[1]);
+            }
+
+            if (segments.Last() == "")
+            {
+                segments = segments.Take(segments.Length - 1).ToArray();
+            }
 
             RouteSegment pointer = null;
 
@@ -92,7 +108,10 @@ namespace Codenizer.HttpClient.Testable
                         {
                             var first = pointer.Segments.Keys.First();
 
-                            if (IsParameter(first)) pointer = pointer.Segments[first];
+                            if (IsParameter(first))
+                            {
+                                pointer = pointer.Segments[first];
+                            }
                         }
                         else
                         {
@@ -105,7 +124,16 @@ namespace Codenizer.HttpClient.Testable
                     }
                 }
 
-            if (pointer != null && pointer.RequestBuilders.ContainsKey(method)) return pointer.RequestBuilders[method];
+            if (pointer != null)
+            {
+                if (pointer.HasForQueryParameters(method))
+                {
+                    // Match on query parameters
+                    return pointer.GetForQueryParameters(method, queryParameters);
+                }
+
+                return pointer.GetWithoutQueryParameters(method);
+            }
 
             return null;
         }
