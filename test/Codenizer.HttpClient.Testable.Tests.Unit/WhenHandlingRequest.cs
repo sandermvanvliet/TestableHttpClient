@@ -123,6 +123,27 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         }
 
         [Fact]
+        public void GivenResponseDurationConfiguredAndHttpClientHasTimeout_OperationCanceledExceptionIsThrown()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromMilliseconds(50)
+            };
+
+            handler
+                .RespondTo("/api/hello?foo=bar")
+                .With(HttpStatusCode.NoContent)
+                .Taking(TimeSpan.FromMilliseconds(100));
+
+            Action action = () => client.GetAsync("https://tempuri.org/api/hello?foo=bar").GetAwaiter().GetResult();
+
+            action
+                .Should()
+                .Throw<OperationCanceledException>();
+        }
+
+        [Fact]
         public async void GivenWhenCalledActionConfigured_ActionIsCalledWhenRequestIsMade()
         {
             var handler = new TestableMessageHandler();
