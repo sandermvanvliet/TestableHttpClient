@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -98,7 +99,14 @@ namespace Codenizer.HttpClient.Testable
 
             if (responseBuilder.Duration > TimeSpan.Zero)
             {
-                Thread.Sleep((int)responseBuilder.Duration.TotalMilliseconds);
+                var stopwatch = Stopwatch.StartNew();
+
+                while (stopwatch.ElapsedMilliseconds < responseBuilder.Duration.TotalMilliseconds)
+                {
+                    Thread.Sleep(5);
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
             }
 
             return response;
