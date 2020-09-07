@@ -31,7 +31,7 @@ namespace Codenizer.HttpClient.Testable
                 QueryParameters = parts[1]
                     .Split('&')
                     .Select(p => p.Split('='))
-                    .ToDictionary(p => p[0], p => p[1]);
+                    .ToDictionary(p => p[0], p => p.Length == 2 ? p[1] : null);
             }
 
             ContentType = contentType;

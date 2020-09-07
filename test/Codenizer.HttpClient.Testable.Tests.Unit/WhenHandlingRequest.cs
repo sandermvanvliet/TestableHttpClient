@@ -327,7 +327,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         }
 
         [Fact]
-        public async void Repro()
+        public async void GivenUriHasQueryParameterWithSlashes_OnlyRoutePartIsMatched()
         {
             var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
@@ -338,6 +338,24 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .With(HttpStatusCode.Found);
 
             var response = await client.GetAsync("https://identity.vwgroup.io/signin-service/v1/consent/users/840f9c5a-12f6-434f-83c4-6ba605f41092/09b6cbec-cd19-4589-82fd-363dfa8c24da@apps_vw-dilab_com?scopes=address%20profile%20badge%20birthdate%20birthplace%20nationalIdentifier%20nationality%20profession%20email%20vin%20phone%20nickname%20name%20picture%20mbb%20gallery%20openid&relayState=b512822e924ef060fe820c8bbcaabe85859d2035&callback=https://identity.vwgroup.io/oidc/v1/oauth/client/callback&hmac=a63faea3311a0b4296df53ed94d617b241a2e078f080f9997e0d4d9cee2f07f3");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.Found);
+        }
+
+        [Fact]
+        public async void GivenUriHasQueryParameterWithoutValues_RouteIsMatchedSuccessfully()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah?foo&bar&baz")
+                .With(HttpStatusCode.Found);
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah?foo&bar&baz");
 
             response
                 .StatusCode
