@@ -145,7 +145,16 @@ namespace Codenizer.HttpClient.Testable
 
         private static string[] PathAndQueryToSegments(string pathAndQuery)
         {
-            return pathAndQuery.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            var parts = pathAndQuery.Split(new[] {'?'}, StringSplitOptions.RemoveEmptyEntries);
+
+            var pathAndQueryToSegments = parts[0].Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            if (parts.Length == 2)
+            {
+                pathAndQueryToSegments[pathAndQueryToSegments.Count - 1] += "?" + parts[1];
+            }
+
+            return pathAndQueryToSegments.ToArray();
         }
     }
 }
