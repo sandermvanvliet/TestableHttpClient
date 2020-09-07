@@ -41,7 +41,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             dictionary
                 .Match(
-                    HttpMethod.Get, 
+                    HttpMethod.Get,
                     "/api/baz")
                 .Should()
                 .BeNull();
@@ -61,7 +61,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             dictionary
                 .Match(
-                    HttpMethod.Get, 
+                    HttpMethod.Get,
                     "/api/foos/1234")
                 .Should()
                 .Be(requestBuilder);
@@ -81,10 +81,49 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             dictionary
                 .Match(
-                    HttpMethod.Get, 
+                    HttpMethod.Get,
                     "/api/foos/1234/?blah=baz")
                 .Should()
                 .Be(requestBuilder);
+        }
+
+        [Fact]
+        public void GivenRouteWithParameterAndQueryStringWithoutSeparator_RequestBuilderIsReturned()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foos/{id}?blah=baz", null);
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foos/1234?blah=baz")
+                .Should()
+                .Be(requestBuilder);
+        }
+
+        [Fact]
+        public void GivenRouteWithParameterAndQueryStringWithoutSeparatorX_RequestBuilderIsReturned()
+        {
+            var routes = new List<RequestBuilder>
+            {
+                new RequestBuilder(HttpMethod.Get, "/api/foos/{id}?blah=baz", null),
+                new RequestBuilder(HttpMethod.Get, "/api/foos/{id}?blah=qux", null)
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foos/1234?blah=qux")
+                .Should()
+                .Be(routes[1]);
         }
     }
 }

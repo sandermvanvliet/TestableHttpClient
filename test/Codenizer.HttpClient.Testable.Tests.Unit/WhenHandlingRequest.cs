@@ -283,5 +283,47 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be($"cookie-name=cookie-value; Path=/some/path;Domain=jedlix.com");
         }
+
+        [Fact]
+        public async void GivenRequestHasQueryStringParameterForAnyValue_RequestIsMatched()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&someFilter=another")
+                .ForQueryStringParameter("key").WithAnyValue()
+                .ForQueryStringParameter("someFilter").WithValue("another")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123?key=SOMETHINGELSE&someFilter=another");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async void GivenRequestHasQueryStringParameterForAnyValueButOtherParameterDoesNotMatch_ResponseIsInternalServerErrorBecauseNoResponseMatches()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&someFilter=another")
+                .ForQueryStringParameter("key").WithAnyValue()
+                .ForQueryStringParameter("someFilter").WithValue("another")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123?key=SOMETHINGELSE&someFilter=SOMETHINGELSE");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.InternalServerError);
+        }
     }
 }

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Resources;
-using System.Text;
 
 namespace Codenizer.HttpClient.Testable
 {
@@ -23,8 +21,23 @@ namespace Codenizer.HttpClient.Testable
         {
             Method = method;
             PathAndQuery = pathAndQuery;
+
+            if (pathAndQuery.Contains("?"))
+            {
+                var parts = pathAndQuery.Split('?');
+
+                PathAndQuery = parts[0];
+
+                QueryParameters = parts[1]
+                    .Split('&')
+                    .Select(p => p.Split('='))
+                    .ToDictionary(p => p[0], p => p[1]);
+            }
+
             ContentType = contentType;
         }
+
+        public Dictionary<string, string> QueryParameters { get; } = new Dictionary<string, string>();
 
         public string PathAndQuery { get; }
         public string ContentType { get; }
@@ -36,6 +49,7 @@ namespace Codenizer.HttpClient.Testable
         public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
         public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
         public List<string> Cookies { get; } = new List<string>();
+        public List<QueryStringAssertion> QueryStringAssertions { get; } = new List<QueryStringAssertion>();
 
         /// <summary>
         /// Respond with the given HTTP status code
@@ -46,6 +60,11 @@ namespace Codenizer.HttpClient.Testable
         {
             StatusCode = statusCode;
             return this;
+        }
+
+        public IRequestBuilderForQueryString ForQueryStringParameter(string key)
+        {
+            return new RequestBuilderForQueryString(this, key);
         }
 
         /// <summary>
@@ -163,9 +182,16 @@ namespace Codenizer.HttpClient.Testable
         }
     }
 
+    public interface IRequestBuilderForQueryString
+    {
+        IRequestBuilder WithAnyValue();
+        IRequestBuilder WithValue(string value);
+    }
+
     public interface IRequestBuilder
     {
         IResponseBuilder With(HttpStatusCode statusCode);
+        IRequestBuilderForQueryString ForQueryStringParameter(string key);
     }
 
     public interface IResponseBuilder

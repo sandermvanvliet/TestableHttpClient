@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using FluentAssertions;
 using Xunit;
@@ -41,7 +39,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .RootSegments["api"]
                 .Segments["foo"]
                 .Segments["bar"]
-                .RequestBuilders[HttpMethod.Get]
+                .GetWithoutQueryParameters(HttpMethod.Get)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -61,10 +59,32 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .RootSegments["api"]
                 .Segments["foo"]
-                .Segments["bar?blah=blurb"]
-                .RequestBuilders[HttpMethod.Get]
+                .Segments["bar"]
+                .GetWithoutQueryParameters(HttpMethod.Get)
                 .Should()
                 .Be(requestBuilder);
+        }
+
+        [Fact]
+        public void GivenPathWithQueryParameters_TailSegmentContainsQueryParameters()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo/bar?blah=blurb", null);
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .RootSegments["api"]
+                .Segments["foo"]
+                .Segments["bar"]
+                .GetWithoutQueryParameters(HttpMethod.Get)
+                .QueryParameters
+                .Should()
+                .Contain("blah", "blurb");
         }
 
         [Fact]
@@ -81,7 +101,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             dictionary
                 .RootSegments["index.php"]
-                .RequestBuilders[HttpMethod.Post]
+                .GetWithoutQueryParameters(HttpMethod.Post)
                 .Should()
                 .Be(requestBuilder);
         }
