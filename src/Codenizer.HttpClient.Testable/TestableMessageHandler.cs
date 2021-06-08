@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -61,6 +62,19 @@ namespace Codenizer.HttpClient.Testable
             }
 
             var responseBuilder = match;
+
+            if (responseBuilder.ResponseSequence.Any())
+            {
+                if (responseBuilder.ResponseSequenceCounter >= responseBuilder.ResponseSequence.Count)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    {
+                        Content = new StringContent($"Received request number {responseBuilder.ResponseSequenceCounter+1} for {request.RequestUri.PathAndQuery} but only {responseBuilder.ResponseSequence.Count} responses were configured")
+                    };
+                }
+
+                responseBuilder = responseBuilder.ResponseSequence[responseBuilder.ResponseSequenceCounter++];
+            }
 
             if (!string.IsNullOrWhiteSpace(responseBuilder.ContentType))
             {
