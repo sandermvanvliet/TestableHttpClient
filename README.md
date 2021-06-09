@@ -282,6 +282,24 @@ await httpClient.PostAsync("/api/infos", new StringContent("test", Encoding.ASCI
 
 the response returned from the handler will be `415 Unsupported Media Type`
 
+### A sequence of responses
+
+In some cases you might want to have multiple responses configured for the same endpoint, for example when you call a status endpoint of a job.
+Using `WithSequence` you can configure an ordered set of responses for a single endpoint:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Get, "/api/status")
+    .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
+    .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
+    .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
+    .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "OK"));
+```
+
+here we have an endpoint `/api/status` that will respond with the content `OK` on the 4th call.
+
+The `builder` argument is a new `IRequestBuilder` instance that you can configure the specific response with for the step in the sequence. It allows you to use all the options of configuring a response like you would have when you use `With()`.
+
 ### Verifying requests have been made
 
 The handler exposes a `Requests` property that contains all requests made to the handler. You can use [FluentAssertions](https://github.com/fluentassertions/fluentassertions/) to assert the properties of the requests.

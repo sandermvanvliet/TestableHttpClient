@@ -11,14 +11,18 @@ namespace Codenizer.HttpClient.Testable
     /// </summary>
     public class RequestBuilder : IRequestBuilder, IResponseBuilder
     {
+        private RequestBuilder _root;
+
         /// <summary>
         /// Creates a new instance that matches the HTTP method, path and query string and content types
         /// </summary>
         /// <param name="method">The HTTP method to match</param>
         /// <param name="pathAndQuery">The path and query string to match</param>
         /// <param name="contentType">The MIME type to match, <c>null</c> matches any MIME type</param>
-        internal RequestBuilder(HttpMethod method, string pathAndQuery, string contentType)
+        /// <param name="root">Optional. The root <see cref="RequestBuilder"/> that this instance belongs to, this is used for requests that have a sequence of responses.</param>
+        internal RequestBuilder(HttpMethod method, string pathAndQuery, string contentType, RequestBuilder root = null)
         {
+            _root = root;
             Method = method;
             PathAndQuery = pathAndQuery;
 
@@ -50,6 +54,8 @@ namespace Codenizer.HttpClient.Testable
         public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
         public List<string> Cookies { get; } = new List<string>();
         public List<QueryStringAssertion> QueryStringAssertions { get; } = new List<QueryStringAssertion>();
+        public List<RequestBuilder> ResponseSequence { get; } = new List<RequestBuilder>();
+        public int ResponseSequenceCounter { get; set; }
 
         /// <summary>
         /// Respond with the given HTTP status code
@@ -65,6 +71,28 @@ namespace Codenizer.HttpClient.Testable
         public IRequestBuilderForQueryString ForQueryStringParameter(string key)
         {
             return new RequestBuilderForQueryString(this, key);
+        }
+
+        /// <summary>
+        /// Add a sequence of responses for this request
+        /// </summary>
+        /// <remarks>Using WithSequence allows you to have multiple calls to the same endpoint with different responses.</remarks>
+        /// <param name="builder">A <see cref="IRequestBuilder"/> instance used to configure the response for this step in the sequence of responses</param>
+        /// <returns>A <see cref="IRequestBuilder"/> instance</returns>
+        public IRequestBuilder WithSequence(Action<IRequestBuilder> builder)
+        {
+            var requestBuilder = new RequestBuilder(Method, PathAndQuery, ContentType, _root ?? this);
+            
+            builder(requestBuilder);
+
+            var root = _root ?? this;
+
+            if (root != null)
+            {
+                root.ResponseSequence.Add(requestBuilder);
+            }
+
+            return requestBuilder;
         }
 
         /// <summary>
@@ -192,6 +220,7 @@ namespace Codenizer.HttpClient.Testable
     {
         IResponseBuilder With(HttpStatusCode statusCode);
         IRequestBuilderForQueryString ForQueryStringParameter(string key);
+        IRequestBuilder WithSequence(Action<IRequestBuilder> builder);
     }
 
     public interface IResponseBuilder
