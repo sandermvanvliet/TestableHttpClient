@@ -199,7 +199,70 @@ handler
     .AndContent("application/json", serializedJson);
 ```
 
-The handler will not serialize the data itself because it does not know about the required serialization settings.
+Using `AndContent` the handler will not serialize the data itself because it does not know about the required serialization settings.
+
+#### Returning JSON data
+
+As most APIs tend to return JSON data a convenience method is introduced on the testable handler. You can configure a request using the `AndJsonContent` method:
+
+```csharp
+var myObject = new {
+    Foo = "bar",
+    Baz = "quux"
+};
+
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndJsonContent(myObject);
+```
+
+In this case the response received by a caller will be serialized using the **default** Json.Net serialization settings.
+
+To control how objects are serialized you can either pass a `JsonSerializerSettings` object to `AndJsonContent`:
+
+```csharp
+var myObject = new {
+    Foo = "bar",
+    Baz = "quux"
+};
+
+var serializerSettings = new JsonSerializerSettings
+{
+    /* settings */
+};
+
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndJsonContent(myObject, serializerSettings);
+```
+
+or if you have a handler for a specific API you can set that at construction time too:
+
+```csharp
+var serializerSettings = new JsonSerializerSettings
+{
+    /* settings */
+};
+
+var handler = new TestableMessageHandler(serializerSettings);
+```
+
+in this case the handler will use those settings when serializing the object to return.
+
+#### Returning binary data
+
+You can now also configure a response to return binary data by passing in a byte array to `AndContent`. This will result in a `ByteArrayContent` object being used on the response:
+
+```csharp
+var myPayload = new byte[] { 0x1, 0x2, 0x3 };
+
+handler
+    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .With(HttpStatus.OK)
+    .AndContent("image/png", myPayload);
+```
 
 ### Response headers
 
