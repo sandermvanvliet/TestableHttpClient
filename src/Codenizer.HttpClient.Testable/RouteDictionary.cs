@@ -72,7 +72,7 @@ namespace Codenizer.HttpClient.Testable
         internal RequestBuilder Match(HttpMethod method, string pathAndQuery)
         {
             var segments = PathAndQueryToSegments(pathAndQuery);
-            var queryParameters = new Dictionary<string, string>();
+            var queryParameters = new List<KeyValuePair<string, string>>();
 
             if (segments.Last().Contains("?"))
             {
@@ -83,7 +83,8 @@ namespace Codenizer.HttpClient.Testable
                 queryParameters = parts[1]
                     .Split('&')
                     .Select(p => p.Split('='))
-                    .ToDictionary(p => p[0], p => p.Length == 2 ? p[1] : null);
+                    .Select(p => new KeyValuePair<string, string>(p[0],  p.Length == 2 ? p[1] : null))
+                    .ToList();
             }
 
             if (segments.Last() == "")

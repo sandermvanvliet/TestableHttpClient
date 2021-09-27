@@ -26,33 +26,46 @@ namespace Codenizer.HttpClient.Testable
             return _requestBuildersWithParameters.ContainsKey(method);
         }
 
-        public RequestBuilder GetForQueryParameters(HttpMethod method, Dictionary<string, string> queryParameters)
+        public RequestBuilder GetForQueryParameters(HttpMethod method, List<KeyValuePair<string, string>> queryParameters)
         {
             var all = _requestBuildersWithParameters[method];
 
             foreach (var b in all)
             {
                 if (b.QueryParameters.All(kv =>
-                    queryParameters.ContainsKey(kv.Key)))
+                    queryParameters.Any(p => p.Key == kv.Key)))
                 {
                     var match = b;
 
                     foreach (var kv in b.QueryParameters)
                     {
                         var assertion = b.QueryStringAssertions.SingleOrDefault(a => a.Key == kv.Key);
-
+                        
                         if (assertion != null)
                         {
-                            if (!assertion.AnyValue && assertion.Value != queryParameters[kv.Key])
+                            // In case the assertion has AnyValue set we don't need to 
+                            // do additional checks because we'll just accept anything
+                            // which in cases of urls with /foo?bar=baz&bar=quux is fine
+                            // as there either _could_ match anyway.
+                            if (!assertion.AnyValue && 
+                                !queryParameters.Any(p => p.Key == kv.Key && p.Value == assertion.Value))
                             {
                                 match = null;
                                 break;
                             }
                         }
-                        else if (b.QueryParameters[kv.Key] != queryParameters[kv.Key])
+                        else
                         {
-                            match = null;
-                            break;
+                            // There is no explicit assertion which means we need to perform
+                            // an exact match based on the PathAndQuery that was specified
+                            // when the request builder was created.
+                            var requestBuilderQueryParameterValue = b.QueryParameters.Single(p => p.Key == kv.Key).Value;
+
+                            if (!queryParameters.Any(p => p.Key == kv.Key && p.Value == requestBuilderQueryParameterValue))
+                            {
+                                match = null;
+                                break;
+                            }
                         }
                     }
 
@@ -91,8 +104,7 @@ namespace Codenizer.HttpClient.Testable
                 foreach (var b in othersWithParameters)
                 {
                     if (b.QueryParameters.All(kv =>
-                        route.QueryParameters.ContainsKey(kv.Key) &&
-                        route.QueryParameters[kv.Key] == kv.Value))
+                        route.QueryParameters.Any(p => p.Key == kv.Key && p.Value == kv.Value)))
                     {
                         throw new MultipleResponsesConfiguredException(2, route.PathAndQuery);
                     }

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Codenizer.HttpClient.Testable
 {
@@ -16,6 +17,7 @@ namespace Codenizer.HttpClient.Testable
     /// </summary>
     public class TestableMessageHandler : HttpMessageHandler
     {
+        private readonly JsonSerializerSettings _serializerSettings;
         private readonly List<RequestBuilder> _configuredRequests;
         private Exception _exceptionToThrow;
 
@@ -32,13 +34,23 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Creates a new instance without any predefined responses
         /// </summary>
-        public TestableMessageHandler()
+        public TestableMessageHandler() : this(null)
         {
+        }
+
+        /// <summary>
+        /// Creates a new instance without any predefined responses
+        /// </summary>
+        public TestableMessageHandler(JsonSerializerSettings serializerSettings)
+        {
+            _serializerSettings = serializerSettings ?? new JsonSerializerSettings();
             _configuredRequests = new List<RequestBuilder>();
         }
 
         /// <inheritdoc />
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             Requests.Add(request);
 
@@ -98,7 +110,24 @@ namespace Codenizer.HttpClient.Testable
 
             if (responseBuilder.Data != null)
             {
-                response.Content = new StringContent(responseBuilder.Data, Encoding.UTF8, responseBuilder.MediaType);
+                if (responseBuilder.Data is byte[] buffer)
+                {
+                    response.Content = new ByteArrayContent(buffer);
+                }
+                else if (responseBuilder.Data is string content)
+                {
+                    response.Content = new StringContent(content, Encoding.UTF8, responseBuilder.MediaType);
+                }
+                else if (responseBuilder.MediaType == "application/json")
+                {
+                    response.Content = new StringContent(JsonConvert.SerializeObject(responseBuilder.Data, responseBuilder.SerializerSettings ?? _serializerSettings), Encoding.UTF8, responseBuilder.MediaType);
+                }
+
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Unable to determine the response object to return as it's not a string, byte[] or object to return as application/json");
+                }
             }
 
             foreach (var header in responseBuilder.Headers)

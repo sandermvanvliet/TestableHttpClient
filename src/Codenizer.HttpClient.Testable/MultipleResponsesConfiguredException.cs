@@ -16,6 +16,7 @@ namespace Codenizer.HttpClient.Testable
             PathAndQuery = pathAndQuery;
         }
 
+        /// <inheritdoc />
         protected MultipleResponsesConfiguredException(SerializationInfo info, StreamingContext context)
              : base(info, context)
         {
@@ -23,6 +24,7 @@ namespace Codenizer.HttpClient.Testable
             PathAndQuery = info.GetString("pathAndQuery");
         }
 
+        /// <inheritdoc />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("numberOfResponses", NumberOfResponses);

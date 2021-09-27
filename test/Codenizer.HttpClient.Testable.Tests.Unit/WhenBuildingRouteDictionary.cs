@@ -84,7 +84,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .GetWithoutQueryParameters(HttpMethod.Get)
                 .QueryParameters
                 .Should()
-                .Contain("blah", "blurb");
+                .Contain(new KeyValuePair<string, string>("blah", "blurb"));
         }
 
         [Fact]

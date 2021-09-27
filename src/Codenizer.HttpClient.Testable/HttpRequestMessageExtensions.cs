@@ -2,6 +2,9 @@ using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
+    /// <summary>
+    /// Extension methods to improve usage patterns of the testable message handler
+    /// </summary>
     public static class HttpRequestMessageExtensions
     {
         /// <summary>

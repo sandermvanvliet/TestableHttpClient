@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using FluentAssertions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Xunit;
 
 namespace Codenizer.HttpClient.Testable.Tests.Unit
@@ -258,7 +260,6 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         {
             var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
-            var expiresAt = DateTime.UtcNow.AddHours(1);
 
             handler
                 .RespondTo(HttpMethod.Get, "/api/entity/{id}")
@@ -284,7 +285,6 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         {
             var handler = new TestableMessageHandler();
             var client = new System.Net.Http.HttpClient(handler);
-            var expiresAt = DateTime.UtcNow.AddHours(1);
 
             handler
                 .RespondTo(HttpMethod.Get, "/api/entity/{id}")
@@ -348,6 +348,26 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         }
 
         [Fact]
+        public async void GivenRequestHasMultipleOccurrencesOfSameQueryParameterAndOneMatchingValue_RequestMatches()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&key=othervalue&key=specificvalue")
+                .ForQueryStringParameter("key").WithValue("specificvalue")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123??key=value&key=othervalue&key=specificvalue");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
         public async void GivenUriHasQueryParameterWithSlashes_OnlyRoutePartIsMatched()
         {
             var handler = new TestableMessageHandler();
@@ -382,6 +402,117 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .StatusCode
                 .Should()
                 .Be(HttpStatusCode.Found);
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredToReturnJson_ResponseContentTypeHeaderIsApplicationJson()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndJsonContent(new
+                {
+                    Foo = "bar"
+                });
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            response
+                .Content
+                .Headers
+                .ContentType
+                .MediaType
+                .Should()
+                .Be("application/json");
+        }
+
+        [Fact]
+        public async void GivenRequestIsConfiguredToReturnJsonWithSpecificSettings_ResponseContentHasExpectedSerializedContent()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndJsonContent(new
+                    {
+                        FooBar = "bar"
+                    },
+                    new JsonSerializerSettings
+                    {
+                        ContractResolver = new DefaultContractResolver
+                        {
+                            NamingStrategy = new SnakeCaseNamingStrategy()
+                        }
+                    });
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            response
+                .Content
+                .ReadAsStringAsync()
+                .GetAwaiter()
+                .GetResult()
+                .Should()
+                .Be("{\"foo_bar\":\"bar\"}");
+        }
+
+        [Fact]
+        public async void GivenHandlerIsConfiguredToReturnJsonWithSpecificSettings_ResponseContentHasExpectedSerializedContent()
+        {
+            var handler = new TestableMessageHandler(new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            });
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndJsonContent(new
+                    {
+                        FooBar = "bar"
+                    });
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            response
+                .Content
+                .ReadAsStringAsync()
+                .GetAwaiter()
+                .GetResult()
+                .Should()
+                .Be("{\"foo_bar\":\"bar\"}");
+        }
+
+        [Fact]
+        public async void GivenHandlerIsConfiguredToReturnByteArray_ResponseContentIsByteArrayContent()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/octet-stream", new byte[] { 0x1, 0x2, 0x3 });
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            response
+                .Content
+                .As<ByteArrayContent>()
+                .ReadAsByteArrayAsync()
+                .GetAwaiter()
+                .GetResult()
+                .Should()
+                .ContainInOrder(new byte[] {0x1, 0x2, 0x3 });
         }
     }
 }
