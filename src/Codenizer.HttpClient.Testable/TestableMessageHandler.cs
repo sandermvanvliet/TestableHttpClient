@@ -158,8 +158,23 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Respond to a GET request for the given relative path and query string
         /// </summary>
+        /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
+        public IRequestBuilder RespondTo()
+        {
+            var requestBuilder = new RequestBuilder();
+
+            _configuredRequests.Add(requestBuilder);
+
+            return requestBuilder;
+        }
+
+        /// <summary>
+        /// Respond to a GET request for the given relative path and query string
+        /// </summary>
         /// <param name="pathAndQuery">The path and query string to match</param>
         /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
+        /// <remarks>A more fluent approach is available through RespondTo().Get().Url()</remarks>
+        [Obsolete("A more fluent approach is available through RespondTo().Get()", false)]
         public IRequestBuilder RespondTo(string pathAndQuery)
         {
             return RespondTo(HttpMethod.Get, pathAndQuery);
@@ -171,6 +186,8 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="method">The HTTP method to match</param>
         /// <param name="pathAndQuery">The path and query string to match</param>
         /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
+        /// <remarks>A more fluent approach is available through RespondTo().Get().Url()</remarks>
+        [Obsolete("A more fluent approach is available through RespondTo().Get()", false)]
         public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery)
         {
             return RespondTo(method, pathAndQuery, null);
@@ -183,6 +200,8 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="pathAndQuery">The path and query string to match</param>
         /// <param name="contentType">The MIME type to match</param>
         /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
+        /// <remarks>A more fluent approach is available through RespondTo().Get().Url()</remarks>
+        [Obsolete("A more fluent approach is available through RespondTo().Get()", false)]
         public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string contentType)
         {
             var requestBuilder = new RequestBuilder(method, pathAndQuery, contentType);

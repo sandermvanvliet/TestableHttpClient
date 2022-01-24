@@ -1,12 +1,17 @@
 # Codenizer.HttpClient.Testable
 
-A package to help you test the usage of HttpClient in your applications.
+A NuGet package to help you test the usage of the .Net HttpClient in your applications.
+
+It supports matching on HTTP verbs, URL, query parameters, content type and much more. It allows you to return specific responses for each matching request as well as asserting that requests were made with the expected parameters and HTTP headers.
 
 ## Build status
+
 [![Build status](https://ci.appveyor.com/api/projects/status/xiqdlv0g1r3xrufv?svg=true)](https://ci.appveyor.com/project/sandermvanvliet/testablehttpclient)
 [![Codenizer.HttpClient.Testable](https://buildstats.info/nuget/Codenizer.HttpClient.Testable)](https://www.nuget.org/packages/Codenizer.HttpClient.Testable/)
 
 Proudly built with [NCrunch](https://www.ncrunch.net).
+
+Have a look at the [changelog](Changelog.md) for recent changes in the latest versions.
 
 ## Introduction
 
@@ -101,7 +106,9 @@ So let's instruct the handler to return a `404 Not Found` when we try to hit `/a
 
 ```csharp
 messageHandler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatusCode.NotFound);
 ```
 
@@ -116,7 +123,9 @@ public void GivenApiReturns404_SorryNoContentIsReturned_Step3()
     var infoClient = new InfoApiClient(httpClient);
     
     messageHandler
-        .RespondTo(HttpMethod.Get, "/api/info/latest")
+        .RespondTo()
+        .Get()
+        .ForUrl("/api/info/latest")
         .With(HttpStatusCode.NotFound);
 
     infoClient
@@ -156,16 +165,18 @@ Yay!
 
 ## Taking it further
 
-The message handler has a number of additional methods to control the responses it will generate. They follow a fluent 
-style so are meant to be used in a chained fashion.
+The message handler has a number of additional methods to control the responses it will generate. They follow a fluent style so are meant to be used in a chained fashion.
 
 ### Configuring the URLs it will respond to
 
 ```csharp
-RespondTo(HttpMethod method, string pathAndQuery)
+RespondTo()
+    .Get() // This can be any HTTP verb such as .Delete(), .Post(), .Put() etc
+    .ForUrl("/your/url/here")
+    .AndContentType("application/json");
 ```
 
-This method allows you to specify the relative part of the URI and the applicable HTTP method. The handler will match
+This pattern allows you to specify the HTTP verb, the relative part of the URI and optionally the content type to respond to. The handler will match
 against the entire path and query string including the HTTP method. If multiple responses are configured against the same URL
 a `MultipleResponsesConfigureException` will be thrown.
 
@@ -194,7 +205,9 @@ you can use this method as:
 var serializedJson = JsonConvert.SerializeObject(myObject);
 
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("application/json", serializedJson);
 ```
@@ -212,7 +225,9 @@ var myObject = new {
 };
 
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndJsonContent(myObject);
 ```
@@ -233,7 +248,9 @@ var serializerSettings = new JsonSerializerSettings
 };
 
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndJsonContent(myObject, serializerSettings);
 ```
@@ -259,7 +276,9 @@ You can now also configure a response to return binary data by passing in a byte
 var myPayload = new byte[] { 0x1, 0x2, 0x3 };
 
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("image/png", myPayload);
 ```
@@ -274,7 +293,9 @@ For example:
 
 ```csharp
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("application/json", serializedJson)
     .AndHeaders(new Dictionary<string, string>
@@ -292,7 +313,9 @@ If a response should include cookies you can configure the request with the `And
 
 ```csharp
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("application/json", serializedJson)
     .AndCookie("cookie-name", "cookie-value");
@@ -318,7 +341,9 @@ With `Taking(TimeSpan time)` you can do that:
 
 ```csharp
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("application/json", serializedJson)
     .Taking(TimeSpan.FromMilliseconds(100));
@@ -333,7 +358,10 @@ As of version `0.4.0` you can now do that like so:
 
 ```csharp
 handler
-    .RespondTo(HttpMethod.Post, "/api/infos/", "application/json")
+    .RespondTo()
+    .Post()
+    .ForUrl("/api/infos/")
+    .AndContentType("application/json")
     .With(HttpStatus.Created);
 ```
 
@@ -352,7 +380,9 @@ Using `WithSequence` you can configure an ordered set of responses for a single 
 
 ```csharp
 handler
-    .RespondTo(HttpMethod.Get, "/api/status")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/status")
     .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
     .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
     .WithSequence(builder => builder.With(HttpStatusCode.OK).AndContent("text/plain", "PENDING"))
@@ -381,7 +411,9 @@ Additionally you can verify the content of the request using the `GetData()` ext
 ```csharp
 // Configure the response
 handler
-    .RespondTo(HttpMethod.Post, "/api/info")
+    .RespondTo()
+    .Post()
+    .ForUrl("/api/info")
     .With(HttpStatusCode.Created);
 
 // Call the endpoint
@@ -404,7 +436,9 @@ For some cases it may be useful to have a callback when the request is handled b
 var wasCalled = false;
 
 handler
-    .RespondTo(HttpMethod.Get, "/api/info/latest")
+    .RespondTo()
+    .Get()
+    .ForUrl("/api/info/latest")
     .With(HttpStatus.OK)
     .AndContent("application/json", serializedJson)
     .WhenCalled(request => wasCalled = true);

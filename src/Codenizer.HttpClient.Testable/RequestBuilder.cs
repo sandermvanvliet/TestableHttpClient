@@ -14,6 +14,10 @@ namespace Codenizer.HttpClient.Testable
     {
         private readonly RequestBuilder _root;
 
+        internal RequestBuilder()
+        {
+        }
+
         /// <summary>
         /// Creates a new instance that matches the HTTP method, path and query string and content types
         /// </summary>
@@ -46,16 +50,16 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// The query parameters configured for the request
         /// </summary>
-        public List<KeyValuePair<string, string>> QueryParameters { get; } = new List<KeyValuePair<string, string>>();
+        public List<KeyValuePair<string, string>> QueryParameters { get; private set; } = new List<KeyValuePair<string, string>>();
 
         /// <summary>
         /// The path and query of the request to match
         /// </summary>
-        public string PathAndQuery { get; }
+        public string PathAndQuery { get; private set; }
         /// <summary>
         /// The MIME type of the request to match
         /// </summary>
-        public string ContentType { get; }
+        public string ContentType { get; private set; }
         /// <summary>
         /// The status code to respond with. Defaults to 500 Internal Server Error
         /// </summary>
@@ -63,7 +67,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// The HTTP verb of the request to match
         /// </summary>
-        public HttpMethod Method { get; }
+        public HttpMethod Method { get; private set; }
         /// <summary>
         /// Optional. The data to respond with. Use <see cref="AndContent"/> or <see cref="AndJsonContent"/> to set.
         /// </summary>
@@ -135,6 +139,76 @@ namespace Codenizer.HttpClient.Testable
             return requestBuilder;
         }
         
+        /// <inheritdoc />
+        public IRequestBuilder Get()
+        {
+            Method = HttpMethod.Get;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder Put()
+        {
+            Method = HttpMethod.Put;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder Post()
+        {
+            Method = HttpMethod.Post;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder Delete()
+        {
+            Method = HttpMethod.Delete;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder Head()
+        {
+            Method = HttpMethod.Head;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder Options()
+        {
+            Method = HttpMethod.Options;
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder ForUrl(string url)
+        {
+            PathAndQuery = url;
+
+            if (PathAndQuery.Contains("?"))
+            {
+                var parts = PathAndQuery.Split('?');
+
+                PathAndQuery = parts[0];
+
+                QueryParameters = parts[1]
+                    .Split('&')
+                    .Select(p => p.Split('='))
+                    .Select(p => new KeyValuePair<string, string>(p[0], p.Length == 2 ? p[1] : null))
+                    .ToList();
+            }
+
+            return this;
+        }
+        
+        /// <inheritdoc />
+        public IRequestBuilder AndContentType(string contentType)
+        {
+            ContentType = contentType;
+            return this;
+        }
+
         /// <inheritdoc />
         public IResponseBuilder AndContent(string mimeType, object data)
         {
@@ -295,6 +369,56 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="builder">A <see cref="IRequestBuilder"/> instance used to configure the response for this step in the sequence of responses</param>
         /// <returns>A <see cref="IRequestBuilder"/> instance</returns>
         IRequestBuilder WithSequence(Action<IRequestBuilder> builder);
+
+        /// <summary>
+        /// Respond to a GET request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Get();
+
+        /// <summary>
+        /// Respond to a PUT request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Put();
+
+        /// <summary>
+        /// Respond to a POST request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Post();
+
+        /// <summary>
+        /// Respond to a DELETE request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Delete();
+
+        /// <summary>
+        /// Respond to a HEAD request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Head();
+
+        /// <summary>
+        /// Respond to a OPTIONS request
+        /// </summary>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Options();
+        
+        /// <summary>
+        /// Respond to a request that matches the given URL
+        /// </summary>
+        /// <param name="url">The relative URL to match</param>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder ForUrl(string url);
+        
+        /// <summary>
+        /// Respond to a request that matches the given content type
+        /// </summary>
+        /// <param name="contentType">A MIME content type (for example text/plain)</param>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder AndContentType(string contentType);
     }
     
     /// <summary>

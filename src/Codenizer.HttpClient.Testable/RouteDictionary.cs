@@ -15,6 +15,8 @@ namespace Codenizer.HttpClient.Testable
 
             foreach (var route in routes)
             {
+                ThrowIfRouteIsNotFullyConfigured(route);
+
                 RouteSegment pointer;
 
                 var routeParts = PathAndQueryToSegments(route.PathAndQuery);
@@ -67,6 +69,19 @@ namespace Codenizer.HttpClient.Testable
             }
 
             return routeDictionary;
+        }
+
+        private static void ThrowIfRouteIsNotFullyConfigured(RequestBuilder route)
+        {
+            if (route.Method == null)
+            {
+                throw new ResponseConfigurationException("The HTTP verb to respond to has not been set");
+            }
+
+            if (string.IsNullOrEmpty(route.PathAndQuery))
+            {
+                throw new ResponseConfigurationException("The URL to respond to has not been set");
+            }
         }
 
         internal RequestBuilder Match(HttpMethod method, string pathAndQuery)

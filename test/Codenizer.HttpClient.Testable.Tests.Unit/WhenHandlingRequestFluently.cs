@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,12 +10,118 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Xunit;
-#pragma warning disable CS0618 // Because this should remain working until v3.x
 
 namespace Codenizer.HttpClient.Testable.Tests.Unit
 {
-    public class WhenHandlingRequest
+    public class WhenHandlingRequestFluently
     {
+        [Fact]
+        public void UsingGet_MethodOfRequestBuilderIsGet()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Get())
+                .Method
+                .Should()
+                .Be(HttpMethod.Get);
+        }
+
+        [Fact]
+        public void UsingPut_MethodOfRequestBuilderIsPut()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Put())
+                .Method
+                .Should()
+                .Be(HttpMethod.Put);
+        }
+
+        [Fact]
+        public void UsingPost_MethodOfRequestBuilderIsPost()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Post())
+                .Method
+                .Should()
+                .Be(HttpMethod.Post);
+        }
+
+        [Fact]
+        public void UsingDelete_MethodOfRequestBuilderIsDelete()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Delete())
+                .Method
+                .Should()
+                .Be(HttpMethod.Delete);
+        }
+
+        [Fact]
+        public void UsingHead_MethodOfRequestBuilderIsHead()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Head())
+                .Method
+                .Should()
+                .Be(HttpMethod.Head);
+        }
+
+        [Fact]
+        public void UsingOptions_MethodOfRequestBuilderIsOptions()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Options())
+                .Method
+                .Should()
+                .Be(HttpMethod.Options);
+        }
+
+        [Fact]
+        public void GivenUrlWithoutQueryParameters_PathAndQueryIsSet()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Get().ForUrl("/derp"))
+                .PathAndQuery
+                .Should()
+                .Be("/derp");
+        }
+
+        [Fact]
+        public void GivenUrlWithQueryParameters_PathAndQueryIsSet()
+        {
+            var handler = new TestableMessageHandler();
+
+            var requestBuilder = ((RequestBuilder)handler.RespondTo().Get().ForUrl("/derp?foo=bar&bar=baz"));
+            
+            requestBuilder
+                .PathAndQuery
+                .Should()
+                .Be("/derp");
+
+            requestBuilder
+                .QueryParameters
+                .Select(kv => kv.Key)
+                .Should()
+                .Contain("foo", "bar");
+        }
+
+        [Fact]
+        public void GivenContentType_ContentTypeIsSet()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Get().ForUrl("/derp").AndContentType("foo/bar"))
+                .ContentType
+                .Should()
+                .Be("foo/bar");
+        }
+
         [Fact]
         public async void GivenConfiguredResponseCodeOk_ResponseStatusIsOk()
         {
@@ -23,7 +129,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.OK);
 
             var response = await client.GetAsync("https://tempuri.org/api/hello?foo=bar");
@@ -41,7 +147,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.OK)
                 .AndContent("text/plain", "data");
 
@@ -62,7 +168,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "data");
 
@@ -73,7 +179,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Headers
                 .ContentType
                 .Should()
-                .Be(new MediaTypeHeaderValue("application/json") {CharSet = "utf-8"});
+                .Be(new MediaTypeHeaderValue("application/json") { CharSet = "utf-8" });
         }
 
         [Fact]
@@ -83,7 +189,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.NoContent)
                 .AndHeaders(new Dictionary<string, string>
                 {
@@ -105,7 +211,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.NoContent)
                 .AndHeaders(new Dictionary<string, string>
                 {
@@ -135,7 +241,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             };
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.NoContent)
                 .Taking(TimeSpan.FromMilliseconds(100));
 
@@ -154,7 +260,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var wasCalled = false;
 
             handler
-                .RespondTo("/api/hello?foo=bar")
+                .RespondTo().Get().ForUrl("/api/hello?foo=bar")
                 .With(HttpStatusCode.NoContent)
                 .WhenCalled(request => wasCalled = true);
 
@@ -172,13 +278,13 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(
-                    HttpMethod.Put,
-                    "/api/hello?foo=bar",
-                    "application/json")
+                .RespondTo()
+                .Put()
+                .ForUrl("/api/hello?foo=bar")
+                .AndContentType("application/json")
                 .With(HttpStatusCode.NoContent);
 
-            var response = await client.PutAsync("https://tempuri.org/api/hello?foo=bar", new StringContent("foo", Encoding.ASCII,"text/plain"));
+            var response = await client.PutAsync("https://tempuri.org/api/hello?foo=bar", new StringContent("foo", Encoding.ASCII, "text/plain"));
 
             response
                 .StatusCode
@@ -193,7 +299,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .RespondTo().Get().ForUrl("/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
 
@@ -212,7 +318,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .RespondTo().Get().ForUrl("/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
                 .AndCookie("cookie-name", "cookie-value");
@@ -238,7 +344,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var expiresAt = DateTime.UtcNow.AddHours(1);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .RespondTo().Get().ForUrl("/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
                 .AndCookie("cookie-name", "cookie-value", expiresAt);
@@ -263,7 +369,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .RespondTo().Get().ForUrl("/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
                 .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com");
@@ -288,7 +394,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}")
+                .RespondTo().Get().ForUrl("/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
                 .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com", path: "/some/path");
@@ -313,7 +419,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&someFilter=another")
+                .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&someFilter=another")
                 .ForQueryStringParameter("key").WithAnyValue()
                 .ForQueryStringParameter("someFilter").WithValue("another")
                 .With(HttpStatusCode.OK)
@@ -334,7 +440,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&someFilter=another")
+                .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&someFilter=another")
                 .ForQueryStringParameter("key").WithAnyValue()
                 .ForQueryStringParameter("someFilter").WithValue("another")
                 .With(HttpStatusCode.OK)
@@ -355,7 +461,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&key=othervalue&key=specificvalue")
+                .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&key=othervalue&key=specificvalue")
                 .ForQueryStringParameter("key").WithValue("specificvalue")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
@@ -375,7 +481,9 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get,
+                .RespondTo()
+                .Get()
+                .ForUrl(
                     "/signin-service/v1/consent/users/840f9c5a-12f6-434f-83c4-6ba605f41092/09b6cbec-cd19-4589-82fd-363dfa8c24da@apps_vw-dilab_com?scopes=address%20profile%20badge%20birthdate%20birthplace%20nationalIdentifier%20nationality%20profession%20email%20vin%20phone%20nickname%20name%20picture%20mbb%20gallery%20openid&relayState=b512822e924ef060fe820c8bbcaabe85859d2035&callback=https://identity.vwgroup.io/oidc/v1/oauth/client/callback&hmac=a63faea3311a0b4296df53ed94d617b241a2e078f080f9997e0d4d9cee2f07f3")
                 .With(HttpStatusCode.Found);
 
@@ -394,7 +502,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/blah?foo&bar&baz")
+                .RespondTo().Get().ForUrl("/api/entity/blah?foo&bar&baz")
                 .With(HttpStatusCode.Found);
 
             var response = await client.GetAsync("https://tempuri.org/api/entity/blah?foo&bar&baz");
@@ -412,7 +520,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .RespondTo().Get().ForUrl("/api/entity/blah")
                 .With(HttpStatusCode.OK)
                 .AndJsonContent(new
                 {
@@ -437,12 +545,12 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .RespondTo().Get().ForUrl("/api/entity/blah")
                 .With(HttpStatusCode.OK)
                 .AndJsonContent(new
-                    {
-                        FooBar = "bar"
-                    },
+                {
+                    FooBar = "bar"
+                },
                     new JsonSerializerSettings
                     {
                         ContractResolver = new DefaultContractResolver
@@ -475,12 +583,12 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .RespondTo().Get().ForUrl("/api/entity/blah")
                 .With(HttpStatusCode.OK)
                 .AndJsonContent(new
-                    {
-                        FooBar = "bar"
-                    });
+                {
+                    FooBar = "bar"
+                });
 
             var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
 
@@ -500,7 +608,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var client = new System.Net.Http.HttpClient(handler);
 
             handler
-                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .RespondTo().Get().ForUrl("/api/entity/blah")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/octet-stream", new byte[] { 0x1, 0x2, 0x3 });
 
@@ -513,7 +621,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .GetAwaiter()
                 .GetResult()
                 .Should()
-                .ContainInOrder(new byte[] {0x1, 0x2, 0x3 });
+                .ContainInOrder(new byte[] { 0x1, 0x2, 0x3 });
         }
     }
 }
