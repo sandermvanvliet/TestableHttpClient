@@ -11,8 +11,8 @@ before_build:
   - cmd: dotnet --version
   - cmd: dotnet restore --verbosity m
 build_script:
-  - cmd: dotnet publish
-  - cmd: dotnet pack
+  - cmd: dotnet publish ./src/Codenizer.HttpClient.Testable/Codenizer.HttpClient.Testable.csproj
+  - cmd: dotnet pack ./src/Codenizer.HttpClient.Testable/Codenizer.HttpClient.Testable.csproj
 after_build:
   # For once the build has completed
 clone_depth: 1
