@@ -220,6 +220,7 @@ namespace Codenizer.HttpClient.Testable
             return this;
         }
 
+        /// <inheritdoc />
         public IRequestBuilder Accepting(string mimeType)
         {
             Accept = mimeType;
