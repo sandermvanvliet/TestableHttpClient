@@ -1,5 +1,41 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.2.0
+
+This release changes the target frameworks for the test project to netcore 3.1, net5 and net6.
+
+It also adds a feature to match requests based on the `Accept` header:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.OK)
+	.AndContent("text/xml", "<foo>blah</foo>");
+```
+
+That will match a request like this:
+
+```http
+GET /foo/bar
+Accept: text/xml
+```
+
+but won't match:
+
+```http
+GET /foo/bar
+Accept: application/json
+```
+
+or
+
+```http
+GET /foo/bar
+```
+
 ## 2.1.0
 
 This release introduces a more fluent way to configure the responses. Instead of calling the handler like so:

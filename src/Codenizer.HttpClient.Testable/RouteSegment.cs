@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
@@ -18,18 +19,45 @@ namespace Codenizer.HttpClient.Testable
 
         public bool HasForQueryParameters(HttpMethod method)
         {
-            if (!_requestBuildersWithParameters.ContainsKey(method))
-            {
-                return false;
-            }
-
             return _requestBuildersWithParameters.ContainsKey(method);
         }
 
-        public RequestBuilder GetForQueryParameters(HttpMethod method, List<KeyValuePair<string, string>> queryParameters)
+        public RequestBuilder GetBestMatching(
+            HttpMethod method, 
+            string accept,
+            List<KeyValuePair<string, string>> queryParameters)
         {
-            var all = _requestBuildersWithParameters[method];
+            if (!_requestBuildersWithParameters.ContainsKey(method))
+            {
+                return null;
+            }
 
+            var matchingResponses = _requestBuildersWithParameters[method];
+
+            if (!string.IsNullOrEmpty(accept))
+            {
+                // If an Accept header was provided filter out every response
+                // that has the wrong accept header set.
+                // Responses that don't have an accept criteria are fine because
+                // they are considered to match any accept header
+                matchingResponses = matchingResponses
+                    .Where(r => r.Accept == null ||
+                                string.Equals(accept, r.Accept, StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+            }
+            else
+            {
+                // Only keep responses that don't have an Accept criteria
+                matchingResponses = matchingResponses
+                    .Where(r => r.Accept == null)
+                    .ToList();
+            }
+
+            return GetForQueryParameters(method, queryParameters, matchingResponses);
+        }
+
+        private RequestBuilder GetForQueryParameters(HttpMethod method, List<KeyValuePair<string, string>> queryParameters, List<RequestBuilder> all)
+        {
             foreach (var b in all)
             {
                 if (b.QueryParameters.All(kv =>
@@ -90,7 +118,8 @@ namespace Codenizer.HttpClient.Testable
             // then we can't add it.
             if (!route.QueryParameters.Any() &&
                 _requestBuildersWithParameters[route.Method].Any() &&
-                _requestBuildersWithParameters[route.Method].All(r => !r.QueryParameters.Any()))
+                _requestBuildersWithParameters[route.Method].All(r => !r.QueryParameters.Any()) &&
+                _requestBuildersWithParameters[route.Method].Any(r => string.Equals(r.Accept, route.Accept, StringComparison.InvariantCultureIgnoreCase)))
             {
                 throw new MultipleResponsesConfiguredException(2, route.PathAndQuery);
             }
@@ -104,7 +133,8 @@ namespace Codenizer.HttpClient.Testable
                 foreach (var b in othersWithParameters)
                 {
                     if (b.QueryParameters.All(kv =>
-                        route.QueryParameters.Any(p => p.Key == kv.Key && p.Value == kv.Value)))
+                        route.QueryParameters.Any(p => p.Key == kv.Key && p.Value == kv.Value)) &&
+                        _requestBuildersWithParameters[route.Method].Any(r => string.Equals(r.Accept, route.Accept, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         throw new MultipleResponsesConfiguredException(2, route.PathAndQuery);
                     }

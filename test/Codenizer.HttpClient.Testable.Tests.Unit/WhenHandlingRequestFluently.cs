@@ -98,7 +98,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var handler = new TestableMessageHandler();
 
             var requestBuilder = ((RequestBuilder)handler.RespondTo().Get().ForUrl("/derp?foo=bar&bar=baz"));
-            
+
             requestBuilder
                 .PathAndQuery
                 .Should()
@@ -116,8 +116,56 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         {
             var handler = new TestableMessageHandler();
 
-            ((RequestBuilder)handler.RespondTo().Get().ForUrl("/derp").AndContentType("foo/bar"))
+            ((RequestBuilder)handler.RespondTo().Post().ForUrl("/derp").AndContentType("foo/bar"))
                 .ContentType
+                .Should()
+                .Be("foo/bar");
+        }
+
+        [Fact]
+        public void GivenContentTypeAndMethodIsGet_ArgumentExceptionIsThrown()
+        {
+            var handler = new TestableMessageHandler();
+
+            Action action = () => handler.RespondTo().Get().ForUrl("/derp").AndContentType("foo/bar");
+
+            action
+                .Should()
+                .Throw<ArgumentException>("a GET cannot have a content type");
+        }
+
+        [Fact]
+        public void GivenContentTypeAndMethodIsHead_ArgumentExceptionIsThrown()
+        {
+            var handler = new TestableMessageHandler();
+
+            Action action = () => handler.RespondTo().Get().ForUrl("/derp").AndContentType("foo/bar");
+
+            action
+                .Should()
+                .Throw<ArgumentException>("a GET cannot have a content type");
+        }
+
+        [Fact]
+        public void GivenContentTypeAndMethodIsDelete_ArgumentExceptionIsThrown()
+        {
+            var handler = new TestableMessageHandler();
+
+            Action action = () => handler.RespondTo().Get().ForUrl("/derp").AndContentType("foo/bar");
+
+            action
+                .Should()
+                .Throw<ArgumentException>("a GET cannot have a content type");
+        }
+        
+
+        [Fact]
+        public void GivenAcceptType_AcceptTypeIsSet()
+        {
+            var handler = new TestableMessageHandler();
+
+            ((RequestBuilder)handler.RespondTo().Post().ForUrl("/derp").Accepting("foo/bar"))
+                .Accept
                 .Should()
                 .Be("foo/bar");
         }

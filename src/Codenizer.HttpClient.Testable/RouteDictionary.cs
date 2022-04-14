@@ -84,7 +84,7 @@ namespace Codenizer.HttpClient.Testable
             }
         }
 
-        internal RequestBuilder Match(HttpMethod method, string pathAndQuery)
+        internal RequestBuilder Match(HttpMethod method, string pathAndQuery, string accept)
         {
             var segments = PathAndQueryToSegments(pathAndQuery);
             var queryParameters = new List<KeyValuePair<string, string>>();
@@ -142,13 +142,9 @@ namespace Codenizer.HttpClient.Testable
 
             if (pointer != null)
             {
-                if (pointer.HasForQueryParameters(method))
-                {
-                    // Match on query parameters
-                    return pointer.GetForQueryParameters(method, queryParameters);
-                }
+                var requestBuilder = pointer.GetBestMatching(method, accept, queryParameters);
 
-                return pointer.GetWithoutQueryParameters(method);
+                return requestBuilder;
             }
 
             return null;

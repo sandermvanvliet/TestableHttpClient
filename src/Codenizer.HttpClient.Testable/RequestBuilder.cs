@@ -108,7 +108,11 @@ namespace Codenizer.HttpClient.Testable
         /// Optional. JSON serializer settings to use when serializing <see cref="Data"/> when sending the response. Use <see cref="AndJsonContent"/> to set.
         /// </summary>
         public JsonSerializerSettings SerializerSettings { get; private set; }
-        
+        /// <summary>
+        /// Optional. The value of the Accept header to match.
+        /// </summary>
+        public string Accept { get; private set; }
+
         /// <inheritdoc />
         public IResponseBuilder With(HttpStatusCode statusCode)
         {
@@ -205,7 +209,20 @@ namespace Codenizer.HttpClient.Testable
         /// <inheritdoc />
         public IRequestBuilder AndContentType(string contentType)
         {
+            if (Method == HttpMethod.Get ||
+                Method == HttpMethod.Head ||
+                Method == HttpMethod.Delete)
+            {
+                throw new ArgumentException($"A request with method {Method} cannot have a Content-Type header");
+            }
+
             ContentType = contentType;
+            return this;
+        }
+
+        public IRequestBuilder Accepting(string mimeType)
+        {
+            Accept = mimeType;
             return this;
         }
 
@@ -419,6 +436,13 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="contentType">A MIME content type (for example text/plain)</param>
         /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
         IRequestBuilder AndContentType(string contentType);
+        
+        /// <summary>
+        /// Respond to a request that matches the accept header
+        /// </summary>
+        /// <param name="mimeType">A MIME content type (for example text/plain)</param>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder Accepting(string mimeType);
     }
     
     /// <summary>

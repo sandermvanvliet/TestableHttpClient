@@ -63,7 +63,7 @@ namespace Codenizer.HttpClient.Testable
                 .From(_configuredRequests)
                 .Match(
                     request.Method,
-                    request.RequestUri.PathAndQuery);
+                    request.RequestUri.PathAndQuery, request.Headers.Accept.ToString());
 
             if(match == null)
             {

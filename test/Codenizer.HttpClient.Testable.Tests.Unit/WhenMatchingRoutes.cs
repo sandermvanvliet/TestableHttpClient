@@ -22,7 +22,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/foo/bar?blah=blurb")
+                    "/api/foo/bar?blah=blurb",
+                    null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -42,7 +43,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/baz")
+                    "/api/baz", 
+                    null)
                 .Should()
                 .BeNull();
         }
@@ -62,7 +64,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/foos/1234")
+                    "/api/foos/1234", 
+                    null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -82,7 +85,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/foos/1234/?blah=baz")
+                    "/api/foos/1234/?blah=baz", 
+                    null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -102,7 +106,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/foos/1234?blah=baz")
+                    "/api/foos/1234?blah=baz", 
+                    null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -121,9 +126,134 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             dictionary
                 .Match(
                     HttpMethod.Get,
-                    "/api/foos/1234?blah=qux")
+                    "/api/foos/1234?blah=qux", 
+                    null)
                 .Should()
                 .Be(routes[1]);
+        }
+
+        [Fact]
+        public void GivenResponseWithAcceptHeaderAndNoAcceptHeaderInRequest_RequestDoesNotMatch()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo", null)
+                .Accepting("foo/bar");
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo", 
+                    null)
+                .Should()
+                .BeNull();
+        }
+
+        [Fact]
+        public void GivenResponseWithAcceptHeaderAndAcceptHeaderInRequestMatches_ResponseBuilderIsReturned()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo", null)
+                .Accepting("foo/bar");
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo",
+                    "foo/bar")
+                .Should()
+                .NotBeNull();
+        }
+
+        [Fact]
+        public void GivenResponseWithAcceptHeaderAndAcceptHeaderInRequestDoesNotMatch_RequestDoesNotMatch()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo", null)
+                .Accepting("foo/bar");
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilder
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo",
+                    "derp/derp")
+                .Should()
+                .BeNull();
+        }
+
+        [Fact]
+        public void GivenTwoResponsesWithDifferentAcceptHeaderAndAcceptHeaderInRequestMatchesSecond_ResponseBuilderIsReturned()
+        {
+            var requestBuilderOne = new RequestBuilder(HttpMethod.Get, "/api/foo", null)
+                .Accepting("foo/bar");
+            var requestBuilderTwo = new RequestBuilder(HttpMethod.Get, "/api/foo", null)
+                .Accepting("baz/quux");
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilderOne,
+                (RequestBuilder)requestBuilderTwo
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo", 
+                    "baz/quux")
+                .Should()
+                .BeOfType<RequestBuilder>()
+                .Which
+                .Accept
+                .Should()
+                .Be("baz/quux");
+        }
+
+        [Fact]
+        public void GivenTwoResponsesWithDifferentAcceptHeaderAndAcceptHeaderInRequestMatchesSecondWithQueryParameters_ResponseBuilderIsReturned()
+        {
+            var requestBuilderOne = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
+                .Accepting("foo/bar");
+            var requestBuilderTwo = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
+                .Accepting("baz/quux");
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilderOne,
+                (RequestBuilder)requestBuilderTwo
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo?bar=baz", 
+                    "baz/quux")
+                .Should()
+                .BeOfType<RequestBuilder>()
+                .Which
+                .Accept
+                .Should()
+                .Be("baz/quux");
         }
     }
 }
