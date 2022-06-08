@@ -1,5 +1,18 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.2.1
+
+This release fixes an issue where paths would get a match if when they shouldn't.
+
+```http
+GET /foo/bar
+```
+
+would also match
+```http
+GET /foo/v1/bar
+```
+
 ## 2.2.0
 
 This release changes the target frameworks for the test project to netcore 3.1, net5 and net6.
