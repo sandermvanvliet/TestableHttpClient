@@ -255,5 +255,20 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be("baz/quux");
         }
+
+        [Fact]
+        public void GivenRouteHasExtraPartInPath_ShouldNotReturnAMatch()
+        {
+            var routes = new List<RequestBuilder>
+            {
+                new RequestBuilder(HttpMethod.Post, "/api/foos/1/bla-bla", "application/json"),
+            };
+
+            var dictionary = RouteDictionary.From(routes);
+
+            dictionary.Match(HttpMethod.Post, "/api/v2/foos/1/bla-bla", "application/json")
+                .Should()
+                .BeNull();
+        }
     }
 }

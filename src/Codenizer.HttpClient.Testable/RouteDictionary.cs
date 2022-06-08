@@ -128,6 +128,10 @@ namespace Codenizer.HttpClient.Testable
                             {
                                 pointer = pointer.Segments[first];
                             }
+                            else
+                            {
+                                return null;
+                            }
                         }
                         else
                         {
