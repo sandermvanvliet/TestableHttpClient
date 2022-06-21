@@ -9,6 +9,7 @@ namespace Codenizer.HttpClient.Testable
     {
         private readonly StringWriter _writer;
         private readonly IndentedTextWriter _indentedWriter;
+        private bool _hasMultipleQueryParams;
 
         public ConfigurationDumpVisitor()
         {
@@ -22,19 +23,35 @@ namespace Codenizer.HttpClient.Testable
         public override void Header(string key, string value)
         {
             _indentedWriter.Indent = 4;
+            _indentedWriter.WriteLine();
+
             _indentedWriter.WriteLine($"{key}: {value}");
         }
 
         public override void QueryParameter(string key, string? value)
         {
             _indentedWriter.Indent = 4;
-            _indentedWriter.WriteLine($"{key}: {value}");
+
+            if (_hasMultipleQueryParams)
+            {
+                _indentedWriter.Write("&");
+            }
+            else
+            {
+                _indentedWriter.Write("?");
+            }
+
+            _indentedWriter.Write($"{key}={value}");
+            
+            _hasMultipleQueryParams = true;
         }
 
         public override void Path(string path)
         {
             _indentedWriter.Indent = 3;
-            _indentedWriter.WriteLine(path);
+            _indentedWriter.Write(path);
+
+            _hasMultipleQueryParams = false;
         }
 
         public override void Authority(string authority)

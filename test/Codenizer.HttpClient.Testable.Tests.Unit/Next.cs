@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using FluentAssertions;
 using Xunit;
@@ -144,54 +140,6 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             match
                 .Should()
                 .BeNull();
-        }
-
-        [Fact]
-        public void Dump()
-        {
-            var handler = new TestableMessageHandler();
-
-            handler
-                .RespondTo()
-                .Get()
-                .ForUrl("/api/v1/some/entity?query=param")
-                .Accepting("text/plain")
-                .With(HttpStatusCode.Accepted);
-
-            handler
-                .RespondTo()
-                .Get()
-                .ForUrl("https://tempuri.org/api/v1/some/entity")
-                .Accepting("text/plain")
-                .With(HttpStatusCode.Created)
-                .AndContent("application/json", new { id = 1});
-
-            handler
-                .RespondTo()
-                .Get()
-                .ForUrl("https://tempuri.org/api/v2/foo/bar?derp=foo")
-                .Accepting("application/json")
-                .ForQueryStringParameter("derp").WithAnyValue()
-                .With(HttpStatusCode.NotModified)
-                .AndHeaders(new Dictionary<string, string>
-                {
-                    { "Cache-Control", "maxage=3600"},
-                    { "Pragma", "no-cache"}
-                });
-            
-            handler
-                .RespondTo()
-                .Head()
-                .ForUrl("http://tempuri.org/api/v1/some")
-                .Accepting("text/plain")
-                .With(HttpStatusCode.OK)
-                .AndCookie("foo", "bar");
-
-            Debug.WriteLine(handler.DumpConfiguredResponses());
-
-#if NCRUNCH
-            throw new Exception("BANG!");
-#endif
         }
     }
 }

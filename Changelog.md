@@ -26,16 +26,59 @@ Debug.WriteLine(output);
 will show you:
 
 ```text
-GET *://
-        */
+GET
+    *://
+        *
             /foo/bar
-                    query=param 
-                        Accept: text/xml
-                        Response:
-                            HTTP 200 Ok with text/xml payload
+                Accept: text/xml
+                Response:
+                    HTTP 200 OK with text/xml payload
 ```
 
 The `*` denotes a wildcard. Here we're using a relative URI which means that it will be matched on any scheme (`http://`, `https://`, `gopher://`) and any authority (host).
+
+When specifying an absolute URI the output includes more details:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.OK)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+handler
+	.RespondTo()
+	.Post()
+	.ForUrl("https://tempuri.org:5200/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.Created)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+var output = handler.DumpConfiguredResponses();
+
+Debug.WriteLine(output);
+```
+
+```text
+GET
+    *://
+        *
+            /foo/bar
+                Accept: text/xml
+                Response:
+                    HTTP 200 OK with text/xml payload
+POST
+    https://
+        tempuri.org:5200
+            /foo/bar
+                Accept: text/xml
+                Response:
+                    HTTP 201 Created with text/xml payload
+```
+
+Here you can see that the scheme and authority are included. Matching will be exactly on those parameters.
 
 **Special note:**
 
