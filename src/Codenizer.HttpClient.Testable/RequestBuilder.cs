@@ -85,7 +85,7 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         public TimeSpan Duration { get; private set; } = TimeSpan.Zero;
         /// <summary>
-        /// Optional. An action that will be called when the request metches, before providing the response.
+        /// Optional. An action that will be called when the request matches, before providing the response.
         /// </summary>
         public Action<HttpRequestMessage>? ActionWhenCalled { get; private set; }
         /// <summary>
