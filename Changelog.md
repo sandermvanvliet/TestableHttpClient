@@ -7,6 +7,36 @@ That lead to a lot of kludges in the code to make for example cookie handling wo
 
 The new approach uses a tree like structure to build the map of configured requests/responses which makes it easier to plug in new behaviour.
 
+Additionally you can now get an overview of the configured requests for use when troubleshooting by calling `DumpConfiguredResponses()` on a `TestableMessageHandler` instance:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.OK)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+var output = handler.DumpConfiguredResponses();
+
+Debug.WriteLine(output);
+```
+
+will show you:
+
+```text
+GET *://
+        */
+            /foo/bar
+                    query=param 
+                        Accept: text/xml
+                        Response:
+                            HTTP 200 Ok with text/xml payload
+```
+
+The `*` denotes a wildcard. Here we're using a relative URI which means that it will be matched on any scheme (`http://`, `https://`, `gopher://`) and any authority (host).
+
 **Special note:**
 
 The behaviour where the handler would return a `415 Unsupported Media Type` when you would PUT/POST to a request with the wrong `Content-Type` header set will be removed in version 2.4.0.
