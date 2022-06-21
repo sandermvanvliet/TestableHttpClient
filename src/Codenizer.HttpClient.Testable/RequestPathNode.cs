@@ -14,7 +14,7 @@ namespace Codenizer.HttpClient.Testable
         }
 
         public RequestQueryNode Add(
-            List<KeyValuePair<string, string>> queryParameters,
+            List<KeyValuePair<string, string?>> queryParameters,
             List<QueryStringAssertion> queryStringAssertions)
         {
             var existingQuery = _queryNodes.SingleOrDefault(node => node.Matches(queryParameters));

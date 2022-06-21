@@ -11,10 +11,10 @@ namespace Codenizer.HttpClient.Testable
         private readonly List<RequestHeadersNode> _headersNodes = new List<RequestHeadersNode>();
 
         public RequestQueryNode(
-            List<KeyValuePair<string, string>> queryParameters,
+            List<KeyValuePair<string, string?>> queryParameters,
             List<QueryStringAssertion> queryStringAssertions)
         {
-            _queryParameters = queryParameters!;
+            _queryParameters = queryParameters;
             _queryStringAssertions = queryStringAssertions;
         }
 
@@ -22,10 +22,10 @@ namespace Codenizer.HttpClient.Testable
         {
             var inputQueryParameters = QueryParametersFrom(queryString);
 
-            return Matches(inputQueryParameters!);
+            return Matches(inputQueryParameters);
         }
 
-        public bool Matches(List<KeyValuePair<string, string>> inputQueryParameters)
+        public bool Matches(List<KeyValuePair<string, string?>> inputQueryParameters)
         {
             if (inputQueryParameters.Count != _queryParameters.Count)
             {
@@ -101,7 +101,7 @@ namespace Codenizer.HttpClient.Testable
 
         public RequestHeadersNode? Match(HttpRequestHeaders headers)
         {
-            return _headersNodes.SingleOrDefault(node => node.Match(headers));;
+            return _headersNodes.SingleOrDefault(node => node.Match(headers));
         }
     }
 }

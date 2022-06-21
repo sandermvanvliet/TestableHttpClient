@@ -63,7 +63,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Gets the path and query string of the responses configured for the HTTP request
         /// </summary>
-        public string PathAndQuery
+        public string? PathAndQuery
         {
             get
             {

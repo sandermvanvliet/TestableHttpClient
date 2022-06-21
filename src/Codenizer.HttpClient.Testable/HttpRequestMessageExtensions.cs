@@ -12,7 +12,7 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         /// <param name="request">The captured request</param>
         /// <returns>Either the <c>string</c>, <c>byte</c> array or <c>null</c> that is the content of the request</returns>
-        public static object GetData(this HttpRequestMessage request)
+        public static object? GetData(this HttpRequestMessage request)
         {
             switch (request.Content)
             {

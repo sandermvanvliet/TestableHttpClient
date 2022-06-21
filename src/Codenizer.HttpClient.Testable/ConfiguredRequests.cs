@@ -19,7 +19,7 @@ namespace Codenizer.HttpClient.Testable
 
                 if(Uri.TryCreate(requestBuilder.PathAndQuery, UriKind.RelativeOrAbsolute, out var parsedUri))
                 {
-                    var methodNode = _root.Add(requestBuilder.Method);
+                    var methodNode = _root.Add(requestBuilder.Method!);
 
                     var scheme = parsedUri.IsAbsoluteUri ? parsedUri.Scheme : "*";
 

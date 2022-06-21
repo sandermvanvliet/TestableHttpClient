@@ -19,7 +19,7 @@ namespace Codenizer.HttpClient.Testable
     {
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly List<RequestBuilder> _configuredRequests;
-        private Exception _exceptionToThrow;
+        private Exception? _exceptionToThrow;
 
         /// <summary>
         /// Returns the list of requests that were captured by this message handler
@@ -41,7 +41,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Creates a new instance without any predefined responses
         /// </summary>
-        public TestableMessageHandler(JsonSerializerSettings serializerSettings)
+        public TestableMessageHandler(JsonSerializerSettings? serializerSettings)
         {
             _serializerSettings = serializerSettings ?? new JsonSerializerSettings();
             _configuredRequests = new List<RequestBuilder>();
@@ -200,7 +200,7 @@ namespace Codenizer.HttpClient.Testable
         /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
         /// <remarks>A more fluent approach is available through RespondTo().Get().Url()</remarks>
         [Obsolete("A more fluent approach is available through RespondTo().Get()", false)]
-        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string contentType)
+        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string? contentType)
         {
             var requestBuilder = new RequestBuilder(method, pathAndQuery, contentType);
 

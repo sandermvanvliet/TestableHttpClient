@@ -14,7 +14,7 @@ namespace Codenizer.HttpClient.Testable
             _headers = headers;
         }
 
-        public RequestBuilder RequestBuilder { get; private set; }
+        public RequestBuilder? RequestBuilder { get; private set; }
 
         public bool Matches(Dictionary<string, string> headers)
         {
@@ -68,7 +68,7 @@ namespace Codenizer.HttpClient.Testable
         {
             if(RequestBuilder != null)
             {
-                throw new MultipleResponsesConfiguredException(2, requestBuilder.PathAndQuery);
+                throw new MultipleResponsesConfiguredException(2, requestBuilder.PathAndQuery!);
             }
 
             RequestBuilder = requestBuilder;
