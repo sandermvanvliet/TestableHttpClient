@@ -217,6 +217,7 @@ namespace Codenizer.HttpClient.Testable
             }
 
             ContentType = contentType;
+            Headers.Add("Content-Type", contentType);
             return this;
         }
 
@@ -224,6 +225,7 @@ namespace Codenizer.HttpClient.Testable
         public IRequestBuilder Accepting(string mimeType)
         {
             Accept = mimeType;
+            Headers.Add("Accept", mimeType);
             return this;
         }
 

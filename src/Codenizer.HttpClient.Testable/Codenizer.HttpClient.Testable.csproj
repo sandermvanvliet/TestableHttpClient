@@ -23,6 +23,8 @@
 
   <PropertyGroup>
     <DocumentationFile>.\Codenizer.HttpClient.Testable.xml</DocumentationFile>
+    <LangVersion>8</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
