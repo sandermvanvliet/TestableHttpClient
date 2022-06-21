@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Codenizer.HttpClient.Testable
@@ -29,6 +30,17 @@ namespace Codenizer.HttpClient.Testable
         public RequestPathNode? Match(string path)
         {
             return _pathNodes.SingleOrDefault(node => node.MatchesPath(path));
+        }
+
+        public void Dump(IndentedTextWriter indentedWriter)
+        {
+            foreach (var node in _pathNodes)
+            {
+                indentedWriter.WriteLine(node.Path);
+                indentedWriter.Indent++;
+                node.Dump(indentedWriter);
+                indentedWriter.Indent--;
+            }
         }
     }
 }

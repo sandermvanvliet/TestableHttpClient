@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Codenizer.HttpClient.Testable
@@ -39,6 +40,17 @@ namespace Codenizer.HttpClient.Testable
             }
 
             return explicitAuthorityMatch;
+        }
+
+        public void Dump(IndentedTextWriter indentedWriter)
+        {
+            foreach (var node in _authorityNodes)
+            {
+                indentedWriter.WriteLine(node.Authority + "/");
+                indentedWriter.Indent++;
+                node.Dump(indentedWriter);
+                indentedWriter.Indent--;
+            }
         }
     }
 }

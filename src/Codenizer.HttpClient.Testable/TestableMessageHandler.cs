@@ -1,7 +1,9 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -224,6 +226,13 @@ namespace Codenizer.HttpClient.Testable
         public void ClearConfiguredResponses()
         {
             _configuredRequests.Clear();
+        }
+
+        public string DumpConfiguredResponses()
+        {
+            var requests = ConfiguredRequests.FromRequestBuilders(ConfiguredResponses);
+
+            return requests.Dump();
         }
     }
 }

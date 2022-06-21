@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
@@ -102,6 +103,26 @@ namespace Codenizer.HttpClient.Testable
         public RequestHeadersNode? Match(HttpRequestHeaders headers)
         {
             return _headersNodes.SingleOrDefault(node => node.Match(headers));
+        }
+
+        public void Dump(IndentedTextWriter indentedWriter)
+        {
+            if (_queryParameters.Any())
+            {
+                foreach (var q in _queryParameters)
+                {
+                    indentedWriter.Write($"{q.Key}={q.Value} ");
+                }
+
+                indentedWriter.WriteLine();
+            }
+
+            foreach (var h in _headersNodes)
+            {
+                indentedWriter.Indent++;
+                h.Dump(indentedWriter);
+                indentedWriter.Indent--;
+            }
         }
     }
 }

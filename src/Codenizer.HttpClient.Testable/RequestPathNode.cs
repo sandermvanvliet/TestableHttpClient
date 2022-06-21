@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Codenizer.HttpClient.Testable
@@ -76,6 +77,16 @@ namespace Codenizer.HttpClient.Testable
             }
 
             return true;
+        }
+
+        public void Dump(IndentedTextWriter indentedWriter)
+        {
+            foreach (var node in _queryNodes)
+            {
+                indentedWriter.Indent++;
+                node.Dump(indentedWriter);
+                indentedWriter.Indent--;
+            }
         }
     }
 }

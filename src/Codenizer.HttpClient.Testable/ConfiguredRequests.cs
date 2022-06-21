@@ -1,5 +1,7 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 
@@ -130,6 +132,17 @@ namespace Codenizer.HttpClient.Testable
         internal static ConfiguredRequests FromRequestBuilders(IEnumerable<RequestBuilder> requestBuilders)
         {
             return new ConfiguredRequests(requestBuilders);
+        }
+
+        public string Dump()
+        {
+            var writer = new StringWriter();
+            
+            var indentedWriter = new IndentedTextWriter(writer, "    ");
+
+            _root.Dump(indentedWriter);
+            
+            return writer.ToString();
         }
     }
 }

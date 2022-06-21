@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
@@ -24,6 +25,17 @@ namespace Codenizer.HttpClient.Testable
         public RequestMethodNode? Match(HttpMethod method)
         {
             return _methodNodes.SingleOrDefault(node => node.Method == method);
+        }
+
+        public void Dump(IndentedTextWriter indentedWriter)
+        {
+            foreach (var node in _methodNodes)
+            {
+                indentedWriter.Write(node.Method + " ");
+                indentedWriter.Indent++;
+                node.Dump(indentedWriter);
+                indentedWriter.Indent--;
+            }
         }
     }
 }
