@@ -267,7 +267,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .RespondTo(HttpMethod.Get, "/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
-                .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com");
+                .AndCookie("cookie-name", "cookie-value", domain: "codenizer.nl");
 
             var response = await client.GetAsync("https://tempuri.org/api/entity/123");
 
@@ -279,7 +279,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Value
                 .First()
                 .Should()
-                .Be($"cookie-name=cookie-value; Domain=jedlix.com");
+                .Be($"cookie-name=cookie-value; Domain=codenizer.nl");
         }
 
         [Fact]
@@ -292,7 +292,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .RespondTo(HttpMethod.Get, "/api/entity/{id}")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}")
-                .AndCookie("cookie-name", "cookie-value", domain: "jedlix.com", path: "/some/path");
+                .AndCookie("cookie-name", "cookie-value", domain: "codenizer.nl", path: "/some/path");
 
             var response = await client.GetAsync("https://tempuri.org/api/entity/123");
 
@@ -304,7 +304,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Value
                 .First()
                 .Should()
-                .Be($"cookie-name=cookie-value; Path=/some/path;Domain=jedlix.com");
+                .Be($"cookie-name=cookie-value; Path=/some/path;Domain=codenizer.nl");
         }
 
         [Fact]

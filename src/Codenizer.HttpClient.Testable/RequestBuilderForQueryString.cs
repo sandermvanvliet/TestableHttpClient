@@ -13,14 +13,14 @@ namespace Codenizer.HttpClient.Testable
 
         public IRequestBuilder WithAnyValue()
         {
-            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion { Key = _key, AnyValue = true });
+            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion(key: _key));
 
             return _requestBuilder;
         }
 
         public IRequestBuilder WithValue(string value)
         {
-            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion { Key = _key, Value = value });
+            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion(key: _key, value: value));
 
             return _requestBuilder;
         }

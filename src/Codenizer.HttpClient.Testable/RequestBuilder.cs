@@ -12,7 +12,7 @@ namespace Codenizer.HttpClient.Testable
     /// </summary>
     public class RequestBuilder : IRequestBuilder, IResponseBuilder
     {
-        private readonly RequestBuilder _root;
+        private readonly RequestBuilder? _root;
 
         internal RequestBuilder()
         {
@@ -25,7 +25,7 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="pathAndQuery">The path and query string to match</param>
         /// <param name="contentType">The MIME type to match, <c>null</c> matches any MIME type</param>
         /// <param name="root">Optional. The root <see cref="RequestBuilder"/> that this instance belongs to, this is used for requests that have a sequence of responses.</param>
-        internal RequestBuilder(HttpMethod method, string pathAndQuery, string contentType, RequestBuilder root = null)
+        internal RequestBuilder(HttpMethod method, string pathAndQuery, string? contentType, RequestBuilder? root = null)
         {
             _root = root;
             Method = method;
@@ -40,7 +40,7 @@ namespace Codenizer.HttpClient.Testable
                 QueryParameters = parts[1]
                     .Split('&')
                     .Select(p => p.Split('='))
-                    .Select(p => new KeyValuePair<string, string>(p[0], p.Length == 2 ? p[1] : null))
+                    .Select(p => new KeyValuePair<string, string?>(p[0], p.Length == 2 ? p[1] : null))
                     .ToList();
             }
 
@@ -50,16 +50,16 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// The query parameters configured for the request
         /// </summary>
-        public List<KeyValuePair<string, string>> QueryParameters { get; private set; } = new List<KeyValuePair<string, string>>();
+        public List<KeyValuePair<string, string?>> QueryParameters { get; private set; } = new List<KeyValuePair<string, string?>>();
 
         /// <summary>
         /// The path and query of the request to match
         /// </summary>
-        public string PathAndQuery { get; private set; }
+        public string? PathAndQuery { get; private set; }
         /// <summary>
         /// The MIME type of the request to match
         /// </summary>
-        public string ContentType { get; private set; }
+        public string? ContentType { get; private set; }
         /// <summary>
         /// The status code to respond with. Defaults to 500 Internal Server Error
         /// </summary>
@@ -71,11 +71,11 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Optional. The data to respond with. Use <see cref="AndContent"/> or <see cref="AndJsonContent"/> to set.
         /// </summary>
-        public object Data { get; private set; }
+        public object? Data { get; private set; }
         /// <summary>
         /// Optional. The MIME type of the content to respond with. Only applicable if <see cref="Data"/> is also provided, otherwise ignored.
         /// </summary>
-        public string MediaType { get; private set; }
+        public string? MediaType { get; private set; }
         /// <summary>
         /// Optional. The headers to set on the response.
         /// </summary>
@@ -87,7 +87,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Optional. An action that will be called when the request metches, before providing the response.
         /// </summary>
-        public Action<HttpRequestMessage> ActionWhenCalled { get; private set; }
+        public Action<HttpRequestMessage>? ActionWhenCalled { get; private set; }
         /// <summary>
         /// Optional. A list of cookies to set on the response. Use <see cref="AndCookie"/> to set.
         /// </summary>
@@ -107,11 +107,11 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Optional. JSON serializer settings to use when serializing <see cref="Data"/> when sending the response. Use <see cref="AndJsonContent"/> to set.
         /// </summary>
-        public JsonSerializerSettings SerializerSettings { get; private set; }
+        public JsonSerializerSettings? SerializerSettings { get; private set; }
         /// <summary>
         /// Optional. The value of the Accept header to match.
         /// </summary>
-        public string Accept { get; private set; }
+        public string? Accept { get; private set; }
 
         /// <inheritdoc />
         public IResponseBuilder With(HttpStatusCode statusCode)
@@ -129,16 +129,23 @@ namespace Codenizer.HttpClient.Testable
         /// <inheritdoc />
         public IRequestBuilder WithSequence(Action<IRequestBuilder> builder)
         {
-            var requestBuilder = new RequestBuilder(Method, PathAndQuery, ContentType, _root ?? this);
+            if (Method == null)
+            {
+                throw new ArgumentNullException(nameof(Method), "HTTP method must be configured");
+            }
+
+            if (string.IsNullOrEmpty(PathAndQuery))
+            {
+                throw new ArgumentNullException(nameof(PathAndQuery), "Request path must be configured");
+            }
+
+            var requestBuilder = new RequestBuilder(Method, PathAndQuery!, ContentType, _root ?? this);
             
             builder(requestBuilder);
 
             var root = _root ?? this;
 
-            if (root != null)
-            {
-                root.ResponseSequence.Add(requestBuilder);
-            }
+            root.ResponseSequence.Add(requestBuilder);
 
             return requestBuilder;
         }
@@ -199,7 +206,7 @@ namespace Codenizer.HttpClient.Testable
                 QueryParameters = parts[1]
                     .Split('&')
                     .Select(p => p.Split('='))
-                    .Select(p => new KeyValuePair<string, string>(p[0], p.Length == 2 ? p[1] : null))
+                    .Select(p => new KeyValuePair<string, string?>(p[0], p.Length == 2 ? p[1] : null))
                     .ToList();
             }
 
@@ -274,10 +281,10 @@ namespace Codenizer.HttpClient.Testable
         public IResponseBuilder AndCookie(string name,
             string value,
             DateTime? expiresAt = null,
-            string sameSite = null,
+            string? sameSite = null,
             bool? secure = null,
-            string path = null,
-            string domain = null,
+            string? path = null,
+            string? domain = null,
             int? maxAge = null)
         {
             var parameters = new List<string>();
@@ -325,7 +332,7 @@ namespace Codenizer.HttpClient.Testable
         }
 
         /// <inheritdoc />
-        public IResponseBuilder AndJsonContent(object value, JsonSerializerSettings serializerSettings = null)
+        public IResponseBuilder AndJsonContent(object value, JsonSerializerSettings? serializerSettings = null)
         {
             if (serializerSettings != null)
             {
@@ -341,18 +348,22 @@ namespace Codenizer.HttpClient.Testable
             return this;
         }
 
-        public Dictionary<string, string> BuildRequestHeaders()
+        /// <summary>
+        /// Create a dictionary that contains all the request headers as configured on this <see cref="RequestBuilder"/>
+        /// </summary>
+        /// <returns>A <c>Dictionary&lt;string, string&gt;</c> containing all request headers</returns>
+        internal Dictionary<string, string> BuildRequestHeaders()
         {
             var headers = new Dictionary<string, string>();
 
             if (!string.IsNullOrEmpty(Accept))
             {
-                headers.Add("Accept", Accept);
+                headers.Add("Accept", Accept!);
             }
 
             if (!string.IsNullOrEmpty(ContentType))
             {
-                headers.Add("Content-Type", ContentType);
+                headers.Add("Content-Type", ContentType!);
             }
 
             return headers;
@@ -513,8 +524,8 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="domain">The domain to which this cookie applies</param>
         /// <param name="maxAge">Number of seconds that this cookie can be alive for</param>
         /// <returns></returns>
-        IResponseBuilder AndCookie(string name, string value, DateTime? expiresAt = null, string sameSite = null,
-            bool? secure = null, string path = null, string domain = null, int? maxAge = null);
+        IResponseBuilder AndCookie(string name, string value, DateTime? expiresAt = null, string? sameSite = null,
+            bool? secure = null, string? path = null, string? domain = null, int? maxAge = null);
 
         /// <summary>
         /// Respond with the given value as a JSON serialized response
@@ -523,6 +534,6 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="serializerSettings">Optional. The JSON serialization settings to use when serializing <paramref name="value"/></param>
         /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
         /// <remarks>If <paramref name="serializerSettings"/> is not given the JSON serialization settings of the <see cref="TestableMessageHandler"/> will be used.</remarks>
-        IResponseBuilder AndJsonContent(object value, JsonSerializerSettings serializerSettings = null);
+        IResponseBuilder AndJsonContent(object value, JsonSerializerSettings? serializerSettings = null);
     }
 }
