@@ -1,10 +1,9 @@
-﻿using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestPathNode
+    internal class RequestPathNode : RequestNode
     {
         public string Path { get; }
         private readonly List<RequestQueryNode> _queryNodes = new List<RequestQueryNode>();
@@ -79,13 +78,13 @@ namespace Codenizer.HttpClient.Testable
             return true;
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
+            visitor.Path(Path);
+
             foreach (var node in _queryNodes)
             {
-                indentedWriter.Indent++;
-                node.Dump(indentedWriter);
-                indentedWriter.Indent--;
+                node.Accept(visitor);
             }
         }
     }

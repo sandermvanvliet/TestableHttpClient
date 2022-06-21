@@ -1,11 +1,10 @@
-﻿using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestMethodNode
+    internal class RequestMethodNode : RequestNode
     {
         private readonly List<RequestSchemeNode> _schemeNodes = new List<RequestSchemeNode>();
         public HttpMethod Method { get; }
@@ -42,14 +41,13 @@ namespace Codenizer.HttpClient.Testable
             return explicitSchemeMatch;
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
+            visitor.Method(Method);
+
             foreach (var node in _schemeNodes)
             {
-                indentedWriter.WriteLine(node.Scheme + "://");
-                indentedWriter.Indent++;
-                node.Dump(indentedWriter);
-                indentedWriter.Indent--;
+                node.Accept(visitor);
             }
         }
     }

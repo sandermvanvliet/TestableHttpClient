@@ -1,10 +1,9 @@
-﻿using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestSchemeNode
+    internal class RequestSchemeNode : RequestNode
     {
         private readonly List<RequestAuthorityNode> _authorityNodes = new List<RequestAuthorityNode>();
 
@@ -42,14 +41,13 @@ namespace Codenizer.HttpClient.Testable
             return explicitAuthorityMatch;
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
+            visitor.Scheme(Scheme);
+
             foreach (var node in _authorityNodes)
             {
-                indentedWriter.WriteLine(node.Authority + "/");
-                indentedWriter.Indent++;
-                node.Dump(indentedWriter);
-                indentedWriter.Indent--;
+                node.Accept(visitor);
             }
         }
     }

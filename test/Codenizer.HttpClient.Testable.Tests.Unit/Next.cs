@@ -169,8 +169,9 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             handler
                 .RespondTo()
                 .Get()
-                .ForUrl("https://tempuri.org/api/v2/foo/bar")
+                .ForUrl("https://tempuri.org/api/v2/foo/bar?derp=foo")
                 .Accepting("application/json")
+                .ForQueryStringParameter("derp").WithAnyValue()
                 .With(HttpStatusCode.NotModified)
                 .AndHeaders(new Dictionary<string, string>
                 {

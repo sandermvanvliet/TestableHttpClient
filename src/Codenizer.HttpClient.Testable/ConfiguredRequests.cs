@@ -1,7 +1,5 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 
@@ -136,13 +134,11 @@ namespace Codenizer.HttpClient.Testable
 
         public string Dump()
         {
-            var writer = new StringWriter();
-            
-            var indentedWriter = new IndentedTextWriter(writer, "    ");
+            var visitor = new ConfigurationDumpVisitor();
 
-            _root.Dump(indentedWriter);
-            
-            return writer.ToString();
+            _root.Accept(visitor);
+
+            return visitor.Output;
         }
     }
 }

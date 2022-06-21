@@ -1,12 +1,10 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestHeadersNode
+    internal class RequestHeadersNode : RequestNode
     {
         private readonly Dictionary<string, string> _headers;
 
@@ -75,40 +73,16 @@ namespace Codenizer.HttpClient.Testable
             RequestBuilder = requestBuilder;
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
-            if (_headers.Any())
+            foreach (var header in _headers)
             {
-                foreach (var header in _headers)
-                {
-                    indentedWriter.Write($"{header.Key}: {header.Value}");
-                }
-
-                indentedWriter.WriteLine();
+                visitor.Header(header.Key, header.Value);
             }
 
             if (RequestBuilder != null)
             {
-                indentedWriter.WriteLine("Response:");
-                indentedWriter.Indent++;
-
-                var payload = RequestBuilder.Data != null
-                    ? $" with {RequestBuilder.MediaType} payload"
-                    : "";
-
-                indentedWriter.WriteLine($"HTTP {(int)RequestBuilder.StatusCode} {RequestBuilder.StatusCode}{payload}");
-
-                if (RequestBuilder.Headers.Any())
-                {
-                    foreach (var h in RequestBuilder.Headers)
-                    {
-                        indentedWriter.WriteLine($"{h.Key}: {h.Value} ");
-                    }
-
-                    indentedWriter.WriteLine();
-                }
-
-                indentedWriter.Indent--;
+                visitor.Response(RequestBuilder);
             }
         }
     }

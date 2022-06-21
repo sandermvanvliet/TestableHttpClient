@@ -1,11 +1,10 @@
-﻿using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestQueryNode
+    internal class RequestQueryNode : RequestNode
     {
         private readonly List<KeyValuePair<string, string?>> _queryParameters;
         private readonly List<QueryStringAssertion> _queryStringAssertions;
@@ -105,23 +104,26 @@ namespace Codenizer.HttpClient.Testable
             return _headersNodes.SingleOrDefault(node => node.Match(headers));
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
             if (_queryParameters.Any())
             {
-                foreach (var q in _queryParameters)
+                foreach (var qp in _queryParameters)
                 {
-                    indentedWriter.Write($"{q.Key}={q.Value} ");
-                }
+                    var value = qp.Value;
+                    var assertion = _queryStringAssertions.SingleOrDefault(a => a.Key == qp.Key);
+                    if (assertion != null)
+                    {
+                        value = assertion.AnyValue ? "(any)" : assertion.Value;
+                    }
 
-                indentedWriter.WriteLine();
+                    visitor.QueryParameter(qp.Key, value);
+                }
             }
 
-            foreach (var h in _headersNodes)
+            foreach (var node in _headersNodes)
             {
-                indentedWriter.Indent++;
-                h.Dump(indentedWriter);
-                indentedWriter.Indent--;
+                node.Accept(visitor);
             }
         }
     }

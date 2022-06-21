@@ -1,11 +1,10 @@
-﻿using System.CodeDom.Compiler;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
-    internal class RequestsRootNode
+    internal class RequestsRootNode : RequestNode
     {
         private readonly List<RequestMethodNode> _methodNodes = new List<RequestMethodNode>();
 
@@ -27,14 +26,11 @@ namespace Codenizer.HttpClient.Testable
             return _methodNodes.SingleOrDefault(node => node.Method == method);
         }
 
-        public void Dump(IndentedTextWriter indentedWriter)
+        public override void Accept(RequestNodeVisitor visitor)
         {
             foreach (var node in _methodNodes)
             {
-                indentedWriter.Write(node.Method + " ");
-                indentedWriter.Indent++;
-                node.Dump(indentedWriter);
-                indentedWriter.Indent--;
+                node.Accept(visitor);
             }
         }
     }
