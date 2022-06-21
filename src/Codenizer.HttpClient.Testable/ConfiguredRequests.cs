@@ -15,6 +15,8 @@ namespace Codenizer.HttpClient.Testable
 
             foreach (var requestBuilder in requestBuilders)
             {
+                ThrowIfRouteIsNotFullyConfigured(requestBuilder);
+
                 if(Uri.TryCreate(requestBuilder.PathAndQuery, UriKind.RelativeOrAbsolute, out var parsedUri))
                 {
                     var methodNode = _root.Add(requestBuilder.Method);
@@ -27,15 +29,20 @@ namespace Codenizer.HttpClient.Testable
 
                     var authorityNode = schemeNode.Add(authority);
 
-                    var path = parsedUri.IsAbsoluteUri
-                        ? parsedUri.PathAndQuery.Split('?').First()
-                        : parsedUri.OriginalString.Split('?').First();
+                    var path = (parsedUri.IsAbsoluteUri
+                            ? parsedUri.PathAndQuery
+                            : parsedUri.OriginalString)
+                        .Split('?').First();
 
                     var pathNode = authorityNode.Add(path);
 
-                    var queryNode = pathNode.Add(requestBuilder.QueryParameters);
+                    var queryNode = pathNode.Add(requestBuilder.QueryParameters, requestBuilder.QueryStringAssertions);
 
-                    queryNode.Add(requestBuilder.Headers);
+                    var headers = requestBuilder.BuildRequestHeaders();
+
+                    var headersNode = queryNode.Add(headers);
+
+                    headersNode.SetRequestBuilder(requestBuilder);
 
                     Count++;
                 }
@@ -46,9 +53,22 @@ namespace Codenizer.HttpClient.Testable
             }
         }
 
+        private static void ThrowIfRouteIsNotFullyConfigured(RequestBuilder route)
+        {
+            if (route.Method == null)
+            {
+                throw new ResponseConfigurationException("The HTTP verb to respond to has not been set");
+            }
+
+            if (string.IsNullOrEmpty(route.PathAndQuery))
+            {
+                throw new ResponseConfigurationException("The URL to respond to has not been set");
+            }
+        }
+
         public int Count { get; }
 
-        public object? Match(HttpRequestMessage httpRequestMessage)
+        public RequestBuilder? Match(HttpRequestMessage httpRequestMessage)
         {
             var scheme = httpRequestMessage.RequestUri.IsAbsoluteUri ? httpRequestMessage.RequestUri.Scheme : "*";
             
@@ -104,7 +124,7 @@ namespace Codenizer.HttpClient.Testable
 
             var headersNode = queryNode.Match(httpRequestMessage.Headers);
 
-            return headersNode;
+            return headersNode?.RequestBuilder;
         }
 
         internal static ConfiguredRequests FromRequestBuilders(IEnumerable<RequestBuilder> requestBuilders)

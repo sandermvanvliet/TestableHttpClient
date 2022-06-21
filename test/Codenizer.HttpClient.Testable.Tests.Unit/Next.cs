@@ -13,7 +13,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "https://blog.codenizer.nl/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
@@ -29,16 +29,13 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "https://blog.codenizer.nl/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
             var match = configuredRequests
                 .Match(new HttpRequestMessage(HttpMethod.Get,
-                    "https://blog.codenizer.nl/api/v1/some/entity?query=param&query=blah&foo=bar")
-                {
-                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                });
+                    "https://blog.codenizer.nl/api/v1/some/entity?query=param&query=blah&foo=bar"));
 
             match
                 .Should()
@@ -51,42 +48,17 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
             var match = configuredRequests
                 .Match(new HttpRequestMessage(HttpMethod.Get,
-                    "/api/v1/some/entity?query=param&query=blah&foo=bar")
-                {
-                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                });
+                    "/api/v1/some/entity?query=param&query=blah&foo=bar"));
 
             match
                 .Should()
                 .NotBeNull();
-        }
-
-        [Fact]
-        public void GivenGetRequestForRelativeUrl_MatchingAbsoluteRequestFails()
-        {
-            var builder = new RequestBuilder(
-                HttpMethod.Get,
-                "/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
-
-            var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
-
-            var match = configuredRequests
-                .Match(new HttpRequestMessage(HttpMethod.Get,
-                    "https://blog.codenizer.nl/api/v1/some/entity?query=param&query=blah&foo=bar")
-                {
-                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                });
-
-            match
-                .Should()
-                .BeNull();
         }
 
         [Fact]
@@ -95,7 +67,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
@@ -117,16 +89,13 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "/api/v1/some/entity?query=param&query=blah&foo=bar",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
             var match = configuredRequests
                 .Match(new HttpRequestMessage(HttpMethod.Get,
-                    "/api/v1/some/entity")
-                {
-                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                });
+                    "/api/v1/some/entity"));
 
             match
                 .Should()
@@ -139,16 +108,13 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "/api/v1/some/entity?query=param",
-                "application/json");
+                null);
 
             var configuredRequests = ConfiguredRequests.FromRequestBuilders(new[] { builder });
 
             var match = configuredRequests
                 .Match(new HttpRequestMessage(HttpMethod.Get,
-                    "/api/v1/some/entity?query=bar")
-                {
-                    Content = new StringContent("{}", Encoding.UTF8, "application/json")
-                });
+                    "/api/v1/some/entity?query=bar"));
 
             match
                 .Should()
@@ -161,7 +127,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             var builder = new RequestBuilder(
                 HttpMethod.Get,
                 "/api/v1/some/entity?query=param",
-                "application/json");
+                null);
             
             builder.Accepting("text/plain");
 

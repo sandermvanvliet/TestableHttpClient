@@ -165,6 +165,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .BeTrue();
         }
 
+        [Obsolete("Returning HTTP 415 UnsupportedMediaType should not be handled automatically, you should configure it yourself if your code depends on it")]
         [Fact]
         public async void GivenRequestIsConfiguredWithSpecificContentTypeAndRequestHasDifferentContentType_UnsupportedMediaTypeIsReturned()
         {
@@ -320,6 +321,27 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
 
             var response = await client.GetAsync("https://tempuri.org/api/entity/123?key=SOMETHINGELSE&someFilter=another");
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async void GivenRequestHasQueryStringParameterForOverriddenValueFromUri_RequestIsMatched()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/{id}?key=value&someFilter=another")
+                .ForQueryStringParameter("key").WithAnyValue()
+                .ForQueryStringParameter("someFilter").WithValue("overridden")
+                .With(HttpStatusCode.OK)
+                .AndContent("application/json", "{\"foo\":\"bar\"}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/123?key=SOMETHINGELSE&someFilter=overridden");
 
             response
                 .StatusCode

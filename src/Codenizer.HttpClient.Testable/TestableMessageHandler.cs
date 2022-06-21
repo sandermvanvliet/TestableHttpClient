@@ -59,11 +59,9 @@ namespace Codenizer.HttpClient.Testable
                 throw _exceptionToThrow;
             }
 
-            var match = RouteDictionary
-                .From(_configuredRequests)
-                .Match(
-                    request.Method,
-                    request.RequestUri.PathAndQuery, request.Headers.Accept.ToString());
+            var match = ConfiguredRequests
+                .FromRequestBuilders(ConfiguredResponses)
+                .Match(request);
 
             if(match == null)
             {

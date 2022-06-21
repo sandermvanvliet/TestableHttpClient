@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
@@ -13,9 +14,24 @@ namespace Codenizer.HttpClient.Testable
             _headers = headers;
         }
 
+        public RequestBuilder RequestBuilder { get; private set; }
+
         public bool Matches(Dictionary<string, string> headers)
         {
-            return false;
+            if (_headers.Count != headers.Count)
+            {
+                return false;
+            }
+
+            foreach (var kv in _headers)
+            {
+                if (!headers.Any(h => h.Key == kv.Key && h.Value == kv.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public bool Match(HttpRequestHeaders headers)
@@ -29,6 +45,16 @@ namespace Codenizer.HttpClient.Testable
                         return false;
                     }
                 }
+                else if (kv.Key == "Content-Type" && _headers.ContainsKey("Content-Type"))
+                {
+                    // TODO: Remove this in a future release (2.4.x)
+                    // This check is only here for backwards compatibility
+                    // for the "feature" to automatically return HTTP 415 Unsupported Media Type
+                    // when the Content-Type header value doesn't match what has been configured
+                    // on that particular URI.
+                    // This should be configured by the user of the library when their software
+                    // depends on that behaviour from a server.
+                }
                 else
                 {
                     return false;
@@ -36,6 +62,16 @@ namespace Codenizer.HttpClient.Testable
             }
 
             return true;
+        }
+
+        public void SetRequestBuilder(RequestBuilder requestBuilder)
+        {
+            if(RequestBuilder != null)
+            {
+                throw new MultipleResponsesConfiguredException(2, requestBuilder.PathAndQuery);
+            }
+
+            RequestBuilder = requestBuilder;
         }
     }
 }

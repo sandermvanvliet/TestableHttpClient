@@ -28,7 +28,7 @@ namespace Codenizer.HttpClient.Testable
 
         public RequestPathNode? Match(string path)
         {
-            return _pathNodes.SingleOrDefault(node => node.Path == path);
+            return _pathNodes.SingleOrDefault(node => node.MatchesPath(path));
         }
     }
 }

@@ -7,11 +7,15 @@ namespace Codenizer.HttpClient.Testable
     internal class RequestQueryNode
     {
         private readonly List<KeyValuePair<string, string?>> _queryParameters;
+        private readonly List<QueryStringAssertion> _queryStringAssertions;
         private readonly List<RequestHeadersNode> _headersNodes = new List<RequestHeadersNode>();
 
-        public RequestQueryNode(List<KeyValuePair<string, string>> queryParameters)
+        public RequestQueryNode(
+            List<KeyValuePair<string, string>> queryParameters,
+            List<QueryStringAssertion> queryStringAssertions)
         {
-            _queryParameters = queryParameters;
+            _queryParameters = queryParameters!;
+            _queryStringAssertions = queryStringAssertions;
         }
 
         public bool Matches(string? queryString)
@@ -36,9 +40,29 @@ namespace Codenizer.HttpClient.Testable
                 {
                     return false;
                 }
+                
+                // Check if there is a specific assertion for this particular parameter
+                var assertion = _queryStringAssertions.SingleOrDefault(q => q.Key == qp.Key);
+                if (assertion != null)
+                {
+                    if (assertion.AnyValue)
+                    {
+                        // When there is an AnyValue assertion we do not have to check
+                        // the value and can simply continue as we've already checked
+                        // that this query parameter is present (see above)
+                        continue;
+                    }
 
-                // Check if the query parameter exists with the right name and value
-                if (!_queryParameters.Any(q => q.Key == qp.Key && q.Value == qp.Value))
+                    // Potentially the assertion overrides the value of the query parameter
+                    // in the originally configured URI, therefore we need to check the
+                    // query parameter exists in the request with the value given in the assertion.
+                    if (!inputQueryParameters.Any(q => q.Key == qp.Key && q.Value == assertion.Value))
+                    {
+                        return false;
+                    }
+                }
+                // When there is no assertion: check if the query parameter exists with the right name and value
+                else if (!_queryParameters.Any(q => q.Key == qp.Key && q.Value == qp.Value))
                 {
                     return false;
                 }

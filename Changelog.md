@@ -1,5 +1,17 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.3.0
+
+This release reworks the way that the configured requests are handled internally. Originally it was a very simple approach that proved to be very difficult to extend with new features over time.
+That lead to a lot of kludges in the code to make for example cookie handling work and as a side-effect it made the code hard to understand.
+
+The new approach uses a tree like structure to build the map of configured requests/responses which makes it easier to plug in new behaviour.
+
+**Special note:**
+
+The behaviour where the handler would return a `415 Unsupported Media Type` when you would PUT/POST to a request with the wrong `Content-Type` header set will be removed in version 2.4.0.
+The rationale here is that when your code depends on this particular behaviour then you should configure the requests accordingly. It was added as a convenience but it turns out that it may lead to requests matching incorrectly and that's not what you want from a library such as this.
+
 ## 2.2.1
 
 This release fixes an issue where paths would get a match if when they shouldn't.

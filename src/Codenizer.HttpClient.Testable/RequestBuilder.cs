@@ -67,7 +67,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// The HTTP verb of the request to match
         /// </summary>
-        public HttpMethod Method { get; private set; }
+        public HttpMethod? Method { get; private set; }
         /// <summary>
         /// Optional. The data to respond with. Use <see cref="AndContent"/> or <see cref="AndJsonContent"/> to set.
         /// </summary>
@@ -217,7 +217,6 @@ namespace Codenizer.HttpClient.Testable
             }
 
             ContentType = contentType;
-            Headers.Add("Content-Type", contentType);
             return this;
         }
 
@@ -225,7 +224,6 @@ namespace Codenizer.HttpClient.Testable
         public IRequestBuilder Accepting(string mimeType)
         {
             Accept = mimeType;
-            Headers.Add("Accept", mimeType);
             return this;
         }
 
@@ -341,6 +339,23 @@ namespace Codenizer.HttpClient.Testable
             Data = value;
 
             return this;
+        }
+
+        public Dictionary<string, string> BuildRequestHeaders()
+        {
+            var headers = new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(Accept))
+            {
+                headers.Add("Accept", Accept);
+            }
+
+            if (!string.IsNullOrEmpty(ContentType))
+            {
+                headers.Add("Content-Type", ContentType);
+            }
+
+            return headers;
         }
     }
 

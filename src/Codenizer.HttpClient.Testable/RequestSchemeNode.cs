@@ -29,7 +29,16 @@ namespace Codenizer.HttpClient.Testable
 
         public RequestAuthorityNode? Match(string authority)
         {
-            return _authorityNodes.SingleOrDefault(node => node.Authority == authority);
+            var explicitAuthorityMatch = _authorityNodes.SingleOrDefault(node => node.Authority == authority);
+
+            if (explicitAuthorityMatch == null)
+            {
+                // If no explicit match was found, try to use a wildcard match.
+                // This is applicable for responses with a relative URI.
+                return _authorityNodes.SingleOrDefault(node => node.Authority == "*");
+            }
+
+            return explicitAuthorityMatch;
         }
     }
 }
