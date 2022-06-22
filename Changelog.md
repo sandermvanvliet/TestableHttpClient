@@ -1,5 +1,119 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.3.0
+
+This release reworks the way that the configured requests are handled internally. Originally it was a very simple approach that proved to be very difficult to extend with new features over time.
+That lead to a lot of kludges in the code to make for example cookie handling work and as a side-effect it made the code hard to understand.
+
+The new approach uses a tree like structure to build the map of configured requests/responses which makes it easier to plug in new behaviour.
+
+Additionally you can now get an overview of the configured requests for use when troubleshooting by calling `GetCurrentConfiguration()` on a `TestableMessageHandler` instance:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.OK)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+var output = handler.GetCurrentConfiguration();
+
+Debug.WriteLine(output);
+```
+
+will show you:
+
+```text
+GET
+    *://
+        *
+            /foo/bar
+                Accept: text/xml
+                Response:
+                    HTTP 200 OK with text/xml payload
+```
+
+The `*` denotes a wildcard. Here we're using a relative URI which means that it will be matched on any scheme (`http://`, `https://`, `gopher://`) and any authority (host).
+
+When specifying an absolute URI the output includes more details:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.OK)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+handler
+	.RespondTo()
+	.Post()
+	.ForUrl("https://tempuri.org:5200/foo/bar")
+	.Accepting("text/xml")
+	.With(HttpStatusCode.Created)
+	.AndContent("text/xml", "<foo>blah</foo>");
+
+var output = handler.GetCurrentConfiguration();
+
+Debug.WriteLine(output);
+```
+
+```text
+GET
+    *://
+        *
+            /foo/bar
+                Accept: text/xml
+                Response:
+                    HTTP 200 OK with text/xml payload
+POST
+    https://
+        tempuri.org:5200
+            /foo/bar
+                Accept: text/xml
+                Response:
+                    HTTP 201 Created with text/xml payload
+```
+
+Here you can see that the scheme and authority are included. Matching will be exactly on those parameters.
+
+### Other changes
+
+#### Query string parameters
+
+The fluent approach of configuring the request had a slightly odd reading when using the `ForQueryStringParameter` method:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar/baz?param=value")
+	.ForQueryStringParameter("param").WithAnyValue();
+```
+
+as you can see the `For...()` is used a bit too much and that makes the code look a bit odd. So a rename has been done to `WithQueryStringParameter`:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar/baz?param=value&otherparam=value")
+	.WithQueryStringParameter("param").HavingAnyValue()
+	.WithQueryStringParameter("otherparam").HavingValue("special");
+```
+
+Likewise `WithAnyValue` and `WithValue` have been renamed to `HavingAnyValue` and `HavingValue`.
+
+The methods have been marked with the `[Obsolete]` attribute and will be removed in the upcoming 3.0.0 version.
+
+#### Returning `415 Unsupported Media Type`
+
+The behaviour where the handler would return a `415 Unsupported Media Type` when you would PUT/POST to a request with the wrong `Content-Type` header set will be removed in version 3.0.0.
+The rationale here is that when your code depends on this particular behaviour then you should configure the requests accordingly. It was added as a convenience but it turns out that it may lead to requests matching incorrectly and that's not what you want from a library such as this.
+
 ## 2.2.1
 
 This release fixes an issue where paths would get a match if when they shouldn't.

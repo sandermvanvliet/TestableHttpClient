@@ -19,7 +19,7 @@ namespace Codenizer.HttpClient.Testable
     {
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly List<RequestBuilder> _configuredRequests;
-        private Exception _exceptionToThrow;
+        private Exception? _exceptionToThrow;
 
         /// <summary>
         /// Returns the list of requests that were captured by this message handler
@@ -41,7 +41,7 @@ namespace Codenizer.HttpClient.Testable
         /// <summary>
         /// Creates a new instance without any predefined responses
         /// </summary>
-        public TestableMessageHandler(JsonSerializerSettings serializerSettings)
+        public TestableMessageHandler(JsonSerializerSettings? serializerSettings)
         {
             _serializerSettings = serializerSettings ?? new JsonSerializerSettings();
             _configuredRequests = new List<RequestBuilder>();
@@ -59,11 +59,9 @@ namespace Codenizer.HttpClient.Testable
                 throw _exceptionToThrow;
             }
 
-            var match = RouteDictionary
-                .From(_configuredRequests)
-                .Match(
-                    request.Method,
-                    request.RequestUri.PathAndQuery, request.Headers.Accept.ToString());
+            var match = ConfiguredRequests
+                .FromRequestBuilders(ConfiguredResponses)
+                .Match(request);
 
             if(match == null)
             {
@@ -202,7 +200,7 @@ namespace Codenizer.HttpClient.Testable
         /// <returns>A <see cref="IRequestBuilder"/> instance that can be used to further configure the response</returns>
         /// <remarks>A more fluent approach is available through RespondTo().Get().Url()</remarks>
         [Obsolete("A more fluent approach is available through RespondTo().Get()", false)]
-        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string contentType)
+        public IRequestBuilder RespondTo(HttpMethod method, string pathAndQuery, string? contentType)
         {
             var requestBuilder = new RequestBuilder(method, pathAndQuery, contentType);
 
@@ -226,6 +224,17 @@ namespace Codenizer.HttpClient.Testable
         public void ClearConfiguredResponses()
         {
             _configuredRequests.Clear();
+        }
+        
+        /// <summary>
+        /// Returns the currently configured requests and their responses as a string
+        /// </summary>
+        /// <returns>A string representing the configured requests</returns>
+        public string GetCurrentConfiguration()
+        {
+            var requests = ConfiguredRequests.FromRequestBuilders(ConfiguredResponses);
+
+            return requests.GetCurrentConfiguration();
         }
     }
 }

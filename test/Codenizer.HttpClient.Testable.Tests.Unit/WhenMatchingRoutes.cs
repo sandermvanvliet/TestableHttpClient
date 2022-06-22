@@ -1,10 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using FluentAssertions;
 using Xunit;
 
 namespace Codenizer.HttpClient.Testable.Tests.Unit
 {
+    public static class ConfiguredRequestsExtensions
+    {
+        internal static RequestBuilder? Match(this ConfiguredRequests configuredRequests, HttpMethod method, string uri,
+            string? accept)
+        {
+            var requestMessage = new HttpRequestMessage(method, uri);
+            if (!string.IsNullOrEmpty(accept))
+            {
+                requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            }
+
+            return configuredRequests.Match(requestMessage);
+        }
+    }
+
     public class WhenMatchingRoutes
     {
         [Fact]
@@ -17,7 +33,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -38,7 +54,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -59,7 +75,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -80,7 +96,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -101,7 +117,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -121,7 +137,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 new RequestBuilder(HttpMethod.Get, "/api/foos/{id}?blah=qux", null)
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -143,7 +159,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 (RequestBuilder)requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -165,7 +181,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 (RequestBuilder)requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -187,7 +203,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 (RequestBuilder)requestBuilder
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -212,7 +228,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 (RequestBuilder)requestBuilderTwo
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -241,7 +257,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 (RequestBuilder)requestBuilderTwo
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary
                 .Match(
@@ -264,7 +280,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 new RequestBuilder(HttpMethod.Post, "/api/foos/1/bla-bla", "application/json"),
             };
 
-            var dictionary = RouteDictionary.From(routes);
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
             dictionary.Match(HttpMethod.Post, "/api/v2/foos/1/bla-bla", "application/json")
                 .Should()
