@@ -6,7 +6,7 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Version>2.2.1</Version>
+    <Version>2.3.0</Version>
     <Title>A HTTP handler for unit testing</Title>
     <Description>An easy way to test HttpClient interactions in unit tests</Description>
     <Copyright>2022 Sander van Vliet</Copyright>
