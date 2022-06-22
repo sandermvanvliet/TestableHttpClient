@@ -7,7 +7,7 @@ That lead to a lot of kludges in the code to make for example cookie handling wo
 
 The new approach uses a tree like structure to build the map of configured requests/responses which makes it easier to plug in new behaviour.
 
-Additionally you can now get an overview of the configured requests for use when troubleshooting by calling `DumpConfiguredResponses()` on a `TestableMessageHandler` instance:
+Additionally you can now get an overview of the configured requests for use when troubleshooting by calling `GetCurrentConfiguration()` on a `TestableMessageHandler` instance:
 
 ```csharp
 handler
@@ -18,7 +18,7 @@ handler
 	.With(HttpStatusCode.OK)
 	.AndContent("text/xml", "<foo>blah</foo>");
 
-var output = handler.DumpConfiguredResponses();
+var output = handler.GetCurrentConfiguration();
 
 Debug.WriteLine(output);
 ```
@@ -56,7 +56,7 @@ handler
 	.With(HttpStatusCode.Created)
 	.AndContent("text/xml", "<foo>blah</foo>");
 
-var output = handler.DumpConfiguredResponses();
+var output = handler.GetCurrentConfiguration();
 
 Debug.WriteLine(output);
 ```

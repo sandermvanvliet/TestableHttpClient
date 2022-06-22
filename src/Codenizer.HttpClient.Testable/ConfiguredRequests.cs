@@ -132,7 +132,7 @@ namespace Codenizer.HttpClient.Testable
             return new ConfiguredRequests(requestBuilders);
         }
 
-        public string Dump()
+        internal string GetCurrentConfiguration()
         {
             var visitor = new ConfigurationDumpVisitor();
 
