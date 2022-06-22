@@ -52,6 +52,8 @@ namespace Codenizer.HttpClient.Testable
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+            var stopwatch = Stopwatch.StartNew();
+
             Requests.Add(request);
 
             if (_exceptionToThrow != null)
@@ -140,14 +142,12 @@ namespace Codenizer.HttpClient.Testable
 
             if (responseBuilder.Duration > TimeSpan.Zero)
             {
-                var stopwatch = Stopwatch.StartNew();
-
                 while (stopwatch.ElapsedMilliseconds < responseBuilder.Duration.TotalMilliseconds)
                 {
                     Thread.Sleep(5);
-                    cancellationToken.ThrowIfCancellationRequested();
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             return response;
