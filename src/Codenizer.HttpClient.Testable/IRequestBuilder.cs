@@ -20,7 +20,15 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         /// <param name="key">The name of the query string parameter</param>
         /// <returns>A <see cref="IRequestBuilderForQueryString"/> to further configure assertions on the query string parameter</returns>
+        [Obsolete("Use " + nameof(WithQueryStringParameter) + " instead")]
         IRequestBuilderForQueryString ForQueryStringParameter(string key);
+
+        /// <summary>
+        /// Only match the request when the provided query string also matches.
+        /// </summary>
+        /// <param name="key">The name of the query string parameter</param>
+        /// <returns>A <see cref="IRequestBuilderForQueryString"/> to further configure assertions on the query string parameter</returns>
+        IRequestBuilderForQueryString WithQueryStringParameter(string key);
 
         /// <summary>
         /// Add a sequence of responses for this request

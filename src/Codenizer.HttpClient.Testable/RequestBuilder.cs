@@ -121,7 +121,14 @@ namespace Codenizer.HttpClient.Testable
         }
         
         /// <inheritdoc />
+        [Obsolete("Use " + nameof(WithQueryStringParameter) + " instead")]
         public IRequestBuilderForQueryString ForQueryStringParameter(string key)
+        {
+            return WithQueryStringParameter(key);
+        }
+
+        /// <inheritdoc />
+        public IRequestBuilderForQueryString WithQueryStringParameter(string key)
         {
             return new RequestBuilderForQueryString(this, key);
         }

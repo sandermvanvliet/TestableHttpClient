@@ -468,8 +468,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             handler
                 .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&someFilter=another")
-                .ForQueryStringParameter("key").WithAnyValue()
-                .ForQueryStringParameter("someFilter").WithValue("another")
+                .WithQueryStringParameter("key").HavingAnyValue()
+                .WithQueryStringParameter("someFilter").HavingValue("another")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
 
@@ -489,8 +489,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             handler
                 .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&someFilter=another")
-                .ForQueryStringParameter("key").WithAnyValue()
-                .ForQueryStringParameter("someFilter").WithValue("another")
+                .WithQueryStringParameter("key").HavingAnyValue()
+                .WithQueryStringParameter("someFilter").HavingValue("another")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
 
@@ -510,7 +510,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             handler
                 .RespondTo().Get().ForUrl("/api/entity/{id}?key=value&key=othervalue&key=specificvalue")
-                .ForQueryStringParameter("key").WithValue("specificvalue")
+                .WithQueryStringParameter("key").HavingValue("specificvalue")
                 .With(HttpStatusCode.OK)
                 .AndContent("application/json", "{\"foo\":\"bar\"}");
 

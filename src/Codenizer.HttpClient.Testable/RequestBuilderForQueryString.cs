@@ -13,12 +13,23 @@ namespace Codenizer.HttpClient.Testable
 
         public IRequestBuilder WithAnyValue()
         {
-            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion(key: _key));
-
-            return _requestBuilder;
+            return HavingAnyValue();
         }
 
         public IRequestBuilder WithValue(string value)
+        {
+            return HavingValue(value);
+        }
+
+        public IRequestBuilder HavingAnyValue()
+        {
+            _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion(key: _key));
+
+            return _requestBuilder;
+            
+        }
+
+        public IRequestBuilder HavingValue(string value)
         {
             _requestBuilder.QueryStringAssertions.Add(new QueryStringAssertion(key: _key, value: value));
 

@@ -279,7 +279,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Value
                 .First()
                 .Should()
-                .Be($"cookie-name=cookie-value; Domain=codenizer.nl");
+                .Be("cookie-name=cookie-value; Domain=codenizer.nl");
         }
 
         [Fact]
@@ -304,7 +304,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Value
                 .First()
                 .Should()
-                .Be($"cookie-name=cookie-value; Path=/some/path;Domain=codenizer.nl");
+                .Be("cookie-name=cookie-value; Path=/some/path;Domain=codenizer.nl");
         }
 
         [Fact]

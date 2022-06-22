@@ -1,3 +1,5 @@
+using System;
+
 namespace Codenizer.HttpClient.Testable
 {
     /// <summary>
@@ -9,6 +11,7 @@ namespace Codenizer.HttpClient.Testable
         /// Match any value of the query string parameter
         /// </summary>
         /// <returns></returns>
+        [Obsolete("Use " + nameof(HavingAnyValue) + " instead")]
         IRequestBuilder WithAnyValue();
 
         /// <summary>
@@ -16,6 +19,20 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        [Obsolete("Use " + nameof(HavingValue) + " instead")]
         IRequestBuilder WithValue(string value);
+
+        /// <summary>
+        /// Match any value of the query string parameter
+        /// </summary>
+        /// <returns></returns>
+        IRequestBuilder HavingAnyValue();
+
+        /// <summary>
+        /// Only match the request if the query string parameter has this exact value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        IRequestBuilder HavingValue(string value);
     }
 }

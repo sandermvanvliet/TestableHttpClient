@@ -80,7 +80,36 @@ POST
 
 Here you can see that the scheme and authority are included. Matching will be exactly on those parameters.
 
-**Special note:**
+### Other changes
+
+#### Query string parameters
+
+The fluent approach of configuring the request had a slightly odd reading when using the `ForQueryStringParameter` method:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar/baz?param=value")
+	.ForQueryStringParameter("param").WithAnyValue();
+```
+
+as you can see the `For...()` is used a bit too much and that makes the code look a bit odd. So a rename has been done to `WithQueryStringParameter`:
+
+```csharp
+handler
+	.RespondTo()
+	.Get()
+	.ForUrl("/foo/bar/baz?param=value&otherparam=value")
+	.WithQueryStringParameter("param").HavingAnyValue()
+	.WithQueryStringParameter("otherparam").HavingValue("special");
+```
+
+Likewise `WithAnyValue` and `WithValue` have been renamed to `HavingAnyValue` and `HavingValue`.
+
+The methods have been marked with the `[Obsolete]` attribute and will be removed in the upcoming 2.4.0 version.
+
+#### Returning `415 Unsupported Media Type`
 
 The behaviour where the handler would return a `415 Unsupported Media Type` when you would PUT/POST to a request with the wrong `Content-Type` header set will be removed in version 2.4.0.
 The rationale here is that when your code depends on this particular behaviour then you should configure the requests accordingly. It was added as a convenience but it turns out that it may lead to requests matching incorrectly and that's not what you want from a library such as this.
