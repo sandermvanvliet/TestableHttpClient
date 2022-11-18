@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -54,7 +55,7 @@ namespace Codenizer.HttpClient.Testable
         {
             var stopwatch = Stopwatch.StartNew();
 
-            Requests.Add(request);
+            Requests.Add(CloneRequest(request));
 
             if (_exceptionToThrow != null)
             {
@@ -151,6 +152,55 @@ namespace Codenizer.HttpClient.Testable
             }
 
             return response;
+        }
+
+        private HttpRequestMessage CloneRequest(HttpRequestMessage request)
+        {
+            var clone = new HttpRequestMessage(request.Method, request.RequestUri)
+            {
+                Version = request.Version
+            };
+
+            foreach (var header in request.Headers)
+            {
+                clone.Headers.Add(header.Key, header.Value);
+            }
+
+            foreach (var property in request.Properties)
+            {
+                clone.Properties.Add(property.Key, property.Value);
+            }
+
+            switch (request.Content)
+            {
+                case StringContent stringContent:
+                    clone.Content = new StringContent(stringContent.ReadAsStringAsync().GetAwaiter().GetResult());
+                    break;
+                case ByteArrayContent byteArrayContent:
+                    clone.Content = new ByteArrayContent(byteArrayContent.ReadAsByteArrayAsync().GetAwaiter().GetResult());
+                    break;
+                case MultipartContent multipartContent:
+                    var clonedMultipartContent = new MultipartContent();
+
+                    foreach (var part in multipartContent)
+                    {
+                        clonedMultipartContent.Add(part);
+                    }
+
+                    clone.Content = clonedMultipartContent;
+                    break;
+                case StreamContent streamContent:
+                    var memoryStream = new MemoryStream();
+                    streamContent.CopyToAsync(memoryStream).GetAwaiter().GetResult();
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    clone.Content = new StreamContent(memoryStream);
+                    break;
+                default:
+                    clone.Content = null;
+                    break;
+            }
+
+            return clone;
         }
 
         /// <summary>

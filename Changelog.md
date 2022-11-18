@@ -1,5 +1,9 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.4.0
+
+This release fixes an issue where in some cases the `Content` of the captured request would not be accessible because the original `HttpRequestMessage` was aready disposed.
+
 ## 2.3.0
 
 This release reworks the way that the configured requests are handled internally. Originally it was a very simple approach that proved to be very difficult to extend with new features over time.

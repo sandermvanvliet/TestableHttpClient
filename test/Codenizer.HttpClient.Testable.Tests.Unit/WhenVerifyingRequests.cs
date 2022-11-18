@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -84,6 +86,28 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .GetData()
                 .Should()
                 .BeEquivalentTo(content);
+        }
+
+        [Fact]
+        public async void GivenRequestMessageIsDisposed_ReadingContentSucceeds()
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri("https://tempuri.org/api/call"))
+                   {
+                       Content = new StringContent("test")
+                   })
+            {
+                await _client.SendAsync(request);
+            }
+
+            Func<Task<string>> action = () => _handler
+                .Requests
+                .Single()
+                .Content
+                .ReadAsStringAsync();
+
+            action
+                .Should()
+                .NotThrow("the request should be a copy and not the disposed original request");
         }
     }
 }
