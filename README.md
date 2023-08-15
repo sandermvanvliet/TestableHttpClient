@@ -450,3 +450,52 @@ When you make a request to `/api/info/latest` the `wasCalled` variable will now 
 
 In situations where you need to reset the configured responses and you can't create a new instance easily you can now use the `ClearConfiguredResponses()` method.
 This will remove any configured response from the handler which allows you to configure new ones.
+
+### Working with dependency injection and `IHttpClientFactory`
+
+When your application uses the [`IHttpClientFactory`](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.ihttpclientfactory?view=dotnet-plat-ext-7.0) it can be more difficult to get the `TestableMessageHandler` to be used by the `HttpClient` used by your code.
+To help with this, you can use the `TestableHttpClientFactory` which allows you to configure the `HttpClient` name and the `TestableMessageHandler` it should use:
+
+**The code under test:**
+
+```csharp
+public class TheRealComponent
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public TheRealComponent(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public async Task<string> ExecuteAsync()
+    {
+        var httpClient = _httpClientFactory.CreateClient("TheNameOfTheClient");
+        return await httpClient.GetStringAsync("https://example.com");
+    }
+}
+```
+
+**The test:**
+
+```csharp
+var httpClientFactory = new TestableHttpClientFactory();
+var handler = httpClientFactory.ConfigureClient("TheNameOfTheClient");
+
+handler
+    .RespondTo()
+    .Get()
+    .ForUrl("https://example.com")
+    .With(HttpStatus.OK)
+    .AndContent("text/plain", "Hello, world!");
+
+var sut = new TheRealComponent(httpClientFactory);
+
+var result = await sut.ExecuteAsync();
+
+result
+    .Should()
+    .Be("Hello, world!");
+```
+
+The `TestableHttpClientFactory` will return a new `HttpClient` instance which is backed by the `TestableMessageHandler` you've configured in the test.
