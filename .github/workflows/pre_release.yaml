@@ -1,0 +1,60 @@
+name: pre-release
+
+on: workflow_dispatch
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get the version
+      id: get_version
+      uses: mavrosxristoforos/get-xml-info@1.0
+      with:
+        xml-file: './Directory.Build.props'
+        xpath: '//Version'
+    - name: Create short version
+      id: shortversion
+      run: |
+        $version = "${{ steps.get_version.outputs.info }}".Substring(0, "${{ steps.get_version.outputs.info }}".LastIndexOf("."))
+        Write-Host "::set-output name=shortversion::$version"
+      shell: pwsh
+    - uses: actions/checkout@v2
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore -c Release .\Codenizer.HttpClient.Testable.sln
+    - name: Test
+      run: dotnet test --no-build --verbosity normal -c Release
+    - name: Create NuGet package for Codenizer.HttpClient.Testable
+      run: dotnet pack ./src/Codenizer.HttpClient.Testable/Codenizer.HttpClient.Testable.csproj -c Release --no-build --no-restore -o ./packaging
+    - name: Get changelog
+      id: get_changelog
+      run: |
+          ./get-changelog.ps1 -currentVersion "${{ steps.shortversion.outputs.shortversion }}"
+      shell: pwsh
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.info }}
+        release_name: ${{ steps.get_version.outputs.info }}
+        draft: false
+        prerelease: true
+        body_path: ./version-changelog.md
+    - name: Upload enricher NuGet package
+      id: upload-nuget-enricher
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./packaging/Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg
+        asset_name: Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg
+        asset_content_type: application/octet-stream
+    - name: Publish enricher package to public NuGet repository
+      run: dotnet nuget push -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json ./packaging/Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg --skip-duplicate --no-symbols

@@ -6,11 +6,8 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Version>2.4.0</Version>
     <Title>A HTTP handler for unit testing</Title>
     <Description>An easy way to test HttpClient interactions in unit tests</Description>
-    <Copyright>2022 Sander van Vliet</Copyright>
-    <Authors>Sander van Vliet</Authors>
     <PackageProjectUrl>https://github.com/sandermvanvliet/TestableHttpClient/</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/sandermvanvliet/TestableHttpClient/</RepositoryUrl>
