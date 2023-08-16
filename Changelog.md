@@ -1,5 +1,54 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.5.0
+
+This release adds the `TestableHttpClientFactory` to help with scenarios where you are using a `IHttpClientFactory` in your code:
+
+**The code under test:**
+
+```csharp
+public class TheRealComponent
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public TheRealComponent(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public async Task<string> ExecuteAsync()
+    {
+        var httpClient = _httpClientFactory.CreateClient("TheNameOfTheClient");
+        return await httpClient.GetStringAsync("https://example.com");
+    }
+}
+```
+
+**The test:**
+
+```csharp
+var httpClientFactory = new TestableHttpClientFactory();
+var handler = httpClientFactory.ConfigureClient("TheNameOfTheClient");
+
+handler
+    .RespondTo()
+    .Get()
+    .ForUrl("https://example.com")
+    .With(HttpStatus.OK)
+    .AndContent("text/plain", "Hello, world!");
+
+var sut = new TheRealComponent(httpClientFactory);
+
+var result = await sut.ExecuteAsync();
+
+result
+    .Should()
+    .Be("Hello, world!");
+```
+
+The `TestableHttpClientFactory` will return a new `HttpClient` instance which is backed by the `TestableMessageHandler` you've configured in the test.
+
+
 ## 2.4.0
 
 This release fixes an issue where in some cases the `Content` of the captured request would not be accessible because the original `HttpRequestMessage` was aready disposed.
