@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -99,15 +98,15 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 await _client.SendAsync(request);
             }
 
-            Func<Task<string>> action = () => _handler
+            var action = () => _handler
                 .Requests
                 .Single()
                 .Content
                 .ReadAsStringAsync();
 
-            action
+            await action
                 .Should()
-                .NotThrow("the request should be a copy and not the disposed original request");
+                .NotThrowAsync("the request should be a copy and not the disposed original request");
         }
     }
 }
