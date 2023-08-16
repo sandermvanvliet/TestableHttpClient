@@ -6,7 +6,6 @@ It supports matching on HTTP verbs, URL, query parameters, content type and much
 
 ## Build status
 
-[![Build status](https://ci.appveyor.com/api/projects/status/xiqdlv0g1r3xrufv?svg=true)](https://ci.appveyor.com/project/sandermvanvliet/testablehttpclient)
 [![Codenizer.HttpClient.Testable](https://buildstats.info/nuget/Codenizer.HttpClient.Testable)](https://www.nuget.org/packages/Codenizer.HttpClient.Testable/)
 
 Proudly built with [NCrunch](https://www.ncrunch.net).
