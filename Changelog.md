@@ -1,6 +1,6 @@
 # Codenizer.HttpClient.Testable Changelog
 
-## 2.5.0
+## 2.5.0.0
 
 This release adds the `TestableHttpClientFactory` to help with scenarios where you are using a `IHttpClientFactory` in your code:
 
@@ -49,11 +49,11 @@ result
 The `TestableHttpClientFactory` will return a new `HttpClient` instance which is backed by the `TestableMessageHandler` you've configured in the test.
 
 
-## 2.4.0
+## 2.4.0.0
 
 This release fixes an issue where in some cases the `Content` of the captured request would not be accessible because the original `HttpRequestMessage` was aready disposed.
 
-## 2.3.0
+## 2.3.0.0
 
 This release reworks the way that the configured requests are handled internally. Originally it was a very simple approach that proved to be very difficult to extend with new features over time.
 That lead to a lot of kludges in the code to make for example cookie handling work and as a side-effect it made the code hard to understand.
@@ -167,7 +167,7 @@ The methods have been marked with the `[Obsolete]` attribute and will be removed
 The behaviour where the handler would return a `415 Unsupported Media Type` when you would PUT/POST to a request with the wrong `Content-Type` header set will be removed in version 3.0.0.
 The rationale here is that when your code depends on this particular behaviour then you should configure the requests accordingly. It was added as a convenience but it turns out that it may lead to requests matching incorrectly and that's not what you want from a library such as this.
 
-## 2.2.1
+## 2.2.1.0
 
 This release fixes an issue where paths would get a match if when they shouldn't.
 
@@ -180,7 +180,7 @@ would also match
 GET /foo/v1/bar
 ```
 
-## 2.2.0
+## 2.2.0.0
 
 This release changes the target frameworks for the test project to netcore 3.1, net5 and net6.
 
@@ -216,7 +216,7 @@ or
 GET /foo/bar
 ```
 
-## 2.1.0
+## 2.1.0.0
 
 This release introduces a more fluent way to configure the responses. Instead of calling the handler like so:
 
@@ -249,7 +249,7 @@ handler
 
 The `RespondTo(HttpMethod method, string url, string contentType)` method is marked as obsolete but as a warning. It will be removed in version 3.x in the future.
 
-## 2.0.0
+## 2.0.0.0
 
 - Added XML Doc comments on public methods and properties to improve documentation in the IDE
 - Added support for `AndJsonContent` that will serialize the provided object using either provided JSON serializer settings, the serializer settings configured on the testable handler or the default Json.Net serializer settings (in that order)
