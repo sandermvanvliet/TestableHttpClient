@@ -1,5 +1,9 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.6.0.0
+
+Downgrade Microsoft.Extensions.Http from 7.0.0 to 6.0.0 for greater compatibility.
+
 ## 2.5.0.0
 
 This release adds the `TestableHttpClientFactory` to help with scenarios where you are using a `IHttpClientFactory` in your code:
