@@ -6,4 +6,8 @@
 		<Company>Codenizer BV</Company>
 		<Copyright>2023 Sander van Vliet</Copyright>
 	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>10</LangVersion>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 </Project>
