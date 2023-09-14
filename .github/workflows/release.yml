@@ -48,8 +48,8 @@ jobs:
         draft: false
         prerelease: false
         body_path: ./version-changelog.md
-    - name: Upload enricher NuGet package
-      id: upload-nuget-enricher
+    - name: Upload NuGet package
+      id: upload-nuget-package
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,5 +58,5 @@ jobs:
         asset_path: ./packaging/Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg
         asset_name: Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg
         asset_content_type: application/octet-stream
-    - name: Publish enricher package to public NuGet repository
+    - name: Publish package to public NuGet repository
       run: dotnet nuget push -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json ./packaging/Codenizer.HttpClient.Testable.${{ steps.shortversion.outputs.shortversion }}.nupkg --skip-duplicate --no-symbols
