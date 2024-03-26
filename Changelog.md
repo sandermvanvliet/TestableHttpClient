@@ -1,5 +1,17 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.7.0.0
+
+Add the option to specify a lambda to configure the `HttpClient` as it's being created by the `TestableHttpClientFactory`.
+
+For example:
+
+```csharp
+_factory.ConfigureClient(
+    "name of client", 
+    httpClient => httpClient.BaseAddress = new Uri("https://example.com"));
+```
+
 ## 2.6.0.0
 
 Downgrade Microsoft.Extensions.Http from 7.0.0 to 6.0.0 for greater compatibility.
