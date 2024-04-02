@@ -1,5 +1,22 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.8.0.0
+
+Add support to supply a lambda to create the response that's sent to the client. It allows you to generate a more dynamic response if the path you're configuring requires that.
+
+For example:
+
+```csharp
+handler
+    .RespondTo(HttpMethod.Get, "/api/entity/blah")
+    .With(HttpStatusCode.OK)
+    .AndContent(
+        "application/json",
+        req => $@"{{""path"":""{req.RequestUri!.PathAndQuery}""}}");
+```
+
+When calling that endpoint the response will contain the path taken from the request.
+
 ## 2.7.0.0
 
 Add the option to specify a lambda to configure the `HttpClient` as it's being created by the `TestableHttpClientFactory`.

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Codenizer.HttpClient.Testable
@@ -15,11 +16,27 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         /// <param name="mimeType">The MIME type of the response</param>
         /// <param name="data">The response to return</param>
-        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        /// <returns>The current <see cref="IResponseBuilder"/> instance</returns>
         /// <remarks>
         /// Depending on the <paramref name="mimeType"/> the supplied data can be a string, byte[] or object. When a byte[] is given the content will be a <see cref="ByteArrayContent"/>,
         /// for strings a <see cref="StringContent"/> is used. For object the MIME type needs to be set to application/json otherwise an <see cref="InvalidOperationException" /> will be thrown.</remarks>
         IResponseBuilder AndContent(string mimeType, object data);
+
+        /// <summary>
+        /// Invoke a callback to generate the response
+        /// </summary>
+        /// <param name="mimeType">The MIME type of the response</param>
+        /// <param name="callback">A lambda to generate the response to send to the called</param>
+        /// <returns>The current <see cref="IResponseBuilder"/> instance</returns>
+        IResponseBuilder AndContent(string mimeType, Func<HttpRequestMessage, object> callback);
+
+        /// <summary>
+        /// Invoke a callback to generate the response
+        /// </summary>
+        /// <param name="mimeType">The MIME type of the response</param>
+        /// <param name="callback">A lambda to generate the response to send to the called</param>
+        /// <returns>The current <see cref="IResponseBuilder"/> instance</returns>
+        IResponseBuilder AndContent(string mimeType, Func<HttpRequestMessage, Task<object>> callback);
 
         /// <summary>
         /// Add the given HTTP headers to the response

@@ -109,13 +109,25 @@ namespace Codenizer.HttpClient.Testable
                 StatusCode = responseBuilder.StatusCode
             };
 
-            if (responseBuilder.Data != null)
+            var responseBuilderData = responseBuilder.Data;
+
+            if (responseBuilderData == null && responseBuilder.ResponseCallback != null)
             {
-                if (responseBuilder.Data is byte[] buffer)
+                responseBuilderData = responseBuilder.ResponseCallback(request);
+            }
+
+            if (responseBuilderData == null && responseBuilder.AsyncResponseCallback != null)
+            {
+                responseBuilderData = await responseBuilder.AsyncResponseCallback(request);
+            }
+            
+            if (responseBuilderData != null)
+            {
+                if (responseBuilderData is byte[] buffer)
                 {
                     response.Content = new ByteArrayContent(buffer);
                 }
-                else if (responseBuilder.Data is string content)
+                else if (responseBuilderData is string content)
                 {
                     response.Content = new StringContent(content, Encoding.UTF8, responseBuilder.MediaType);
                 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Codenizer.HttpClient.Testable
@@ -72,6 +73,11 @@ namespace Codenizer.HttpClient.Testable
         /// Optional. The data to respond with. Use <see cref="AndContent"/> or <see cref="AndJsonContent"/> to set.
         /// </summary>
         public object? Data { get; private set; }
+        /// <summary>
+        /// Optional. The callback to invoke when generating the response to a request.
+        /// </summary>
+        public Func<HttpRequestMessage, object>? ResponseCallback { get; private set; }
+        public Func<HttpRequestMessage, Task<object>>? AsyncResponseCallback { get; private set; }
         /// <summary>
         /// Optional. The MIME type of the content to respond with. Only applicable if <see cref="Data"/> is also provided, otherwise ignored.
         /// </summary>
@@ -249,7 +255,23 @@ namespace Codenizer.HttpClient.Testable
 
             return this;
         }
-        
+
+        public IResponseBuilder AndContent(string mimeType, Func<HttpRequestMessage, object> callback)
+        {
+            MediaType = mimeType;
+            ResponseCallback = callback;
+
+            return this;
+        }
+
+        public IResponseBuilder AndContent(string mimeType, Func<HttpRequestMessage, Task<object>> callback)
+        {
+            MediaType = mimeType;
+            AsyncResponseCallback = callback;
+
+            return this;
+        }
+
         /// <inheritdoc />
         public IResponseBuilder AndHeaders(Dictionary<string, string> headers)
         {

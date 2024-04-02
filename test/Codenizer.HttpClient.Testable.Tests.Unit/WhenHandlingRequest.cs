@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -536,6 +537,80 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .GetResult()
                 .Should()
                 .ContainInOrder(new byte[] {0x1, 0x2, 0x3 });
+        }
+
+        [Fact]
+        public async Task GivenHandlerOnRequest_HandlerIsInvoked()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndContent(
+                    "application/json",
+                    req => $@"{{""path"":""{req.RequestUri!.PathAndQuery}""}}");
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            var serializedContent = await response.Content.ReadAsStringAsync();
+
+            serializedContent.Should().Be(@"{""path"":""/api/entity/blah""}");
+        }
+
+        [Fact]
+        public async Task GivenAsyncHandlerOnRequest_HandlerIsInvoked()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Get, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndContent(
+                    "application/json",
+                    async req =>
+                    {
+                        await Task.Delay(10);
+                        
+                        return $@"{{""path"":""{req.RequestUri!.PathAndQuery}""}}";
+                    });
+
+            var response = await client.GetAsync("https://tempuri.org/api/entity/blah");
+
+            var serializedContent = await response.Content.ReadAsStringAsync();
+
+            serializedContent.Should().Be(@"{""path"":""/api/entity/blah""}");
+        }
+
+        [Fact]
+        public async Task GivenAsyncHandlerOnRequestThatReadsRequestContent_ContentCanStillBeInspectedInAssertion()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo(HttpMethod.Post, "/api/entity/blah")
+                .With(HttpStatusCode.OK)
+                .AndContent(
+                    "text/plain",
+                    async req => 
+                    {
+                        var postedContent = await req.Content!.ReadAsStringAsync();
+
+                        return postedContent;
+                    });
+
+            await client.PostAsync("https://tempuri.org/api/entity/blah", new StringContent("HELLO WORLD!"));
+
+            var content = await handler
+                .Requests
+                .Single()
+                .Content!
+                .ReadAsStringAsync();
+
+            content.Should().Be("HELLO WORLD!");
         }
     }
 }
