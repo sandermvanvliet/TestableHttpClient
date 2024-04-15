@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace Codenizer.HttpClient.Testable
@@ -103,7 +104,7 @@ namespace Codenizer.HttpClient.Testable
         {
             return _headersNodes.SingleOrDefault(node => node.Match(headers));
         }
-
+        
         public override void Accept(RequestNodeVisitor visitor)
         {
             if (_queryParameters.Any())

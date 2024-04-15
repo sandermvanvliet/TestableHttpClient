@@ -94,5 +94,12 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="mimeType">A MIME content type (for example text/plain)</param>
         /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
         IRequestBuilder Accepting(string mimeType);
+
+        /// <summary>
+        /// Respond to a request that matches the request content
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder ForContent(string content);
     }
 }

@@ -1,5 +1,25 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.9.0.0
+
+Add support to configure expected request content. 
+This can be particularly useful if you want to match a route for a specific request body.
+
+For example:
+
+```csharp
+handler
+    .RespondTo()
+    .Post()
+    .ForUrl("/search")
+    .ForContent(@"{""params"":{""foo"":""bar""}}")
+    .With(HttpStatusCode.OK);
+```
+
+will only match when the request body is _exactly_ `{"params":{"foo":"bar"}}`.
+
+Currently only string content is supported.
+
 ## 2.8.0.0
 
 Add support to supply a lambda to create the response that's sent to the client. It allows you to generate a more dynamic response if the path you're configuring requires that.

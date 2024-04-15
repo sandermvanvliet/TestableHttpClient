@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace Codenizer.HttpClient.Testable
@@ -7,6 +8,7 @@ namespace Codenizer.HttpClient.Testable
     internal class RequestHeadersNode : RequestNode
     {
         private readonly Dictionary<string, string> _headers;
+        private readonly List<RequestContentNode> _requestContentNodes = new();
 
         public RequestHeadersNode(Dictionary<string, string> headers)
         {
@@ -63,14 +65,9 @@ namespace Codenizer.HttpClient.Testable
             return true;
         }
 
-        public void SetRequestBuilder(RequestBuilder requestBuilder)
+        public RequestContentNode? Match(HttpContent content)
         {
-            if(RequestBuilder != null)
-            {
-                throw new MultipleResponsesConfiguredException(2, requestBuilder.PathAndQuery!);
-            }
-
-            RequestBuilder = requestBuilder;
+            return _requestContentNodes.SingleOrDefault(node => node.Match(content));
         }
 
         public override void Accept(RequestNodeVisitor visitor)
@@ -80,10 +77,26 @@ namespace Codenizer.HttpClient.Testable
                 visitor.Header(header.Key, header.Value);
             }
 
-            if (RequestBuilder != null)
+            foreach (var node in _requestContentNodes)
             {
-                visitor.Response(RequestBuilder);
+                node.Accept(visitor);
             }
+        }
+
+        public RequestContentNode Add(string? expectedContent)
+        {
+            var existingContentNode = _requestContentNodes.SingleOrDefault(node => node.Match(expectedContent));
+
+            if (existingContentNode == null)
+            {
+                var requestContentNode = new RequestContentNode(expectedContent);
+
+                _requestContentNodes.Add(requestContentNode);
+
+                return requestContentNode;
+            }
+
+            return existingContentNode;
         }
     }
 }

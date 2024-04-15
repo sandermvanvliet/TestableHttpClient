@@ -100,5 +100,10 @@ namespace Codenizer.HttpClient.Testable
                 }
             }
         }
+
+        public override void Content(string expectedContent)
+        {
+            _indentedWriter.WriteLine($"Content: {expectedContent}");
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace Codenizer.HttpClient.Testable
         public abstract void Scheme(string scheme);
         public abstract void Method(HttpMethod method);
         public abstract void Response(RequestBuilder requestBuilder);
+        public abstract void Content(string expectedContent);
     }
 }

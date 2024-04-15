@@ -119,6 +119,11 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         public string? Accept { get; private set; }
 
+        /// <summary>
+        /// Optional. The expected content of the request.
+        /// </summary>
+        public string? ExpectedContent { get; private set; }
+        
         /// <inheritdoc />
         public IResponseBuilder With(HttpStatusCode statusCode)
         {
@@ -244,6 +249,12 @@ namespace Codenizer.HttpClient.Testable
         public IRequestBuilder Accepting(string mimeType)
         {
             Accept = mimeType;
+            return this;
+        }
+
+        public IRequestBuilder ForContent(string content)
+        {
+            ExpectedContent = content;
             return this;
         }
 

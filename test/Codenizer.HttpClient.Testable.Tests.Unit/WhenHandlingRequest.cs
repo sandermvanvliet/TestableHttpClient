@@ -612,5 +612,51 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             content.Should().Be("HELLO WORLD!");
         }
+
+        [Fact]
+        public async Task GivenExpectationForContentAndContentMatches_ConfiguredResponseIsReturned()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo()
+                .Post()
+                .ForUrl("/search")
+                .ForContent(@"{""params"":{""query_string"":""confetti""}}")
+                .With(HttpStatusCode.OK);
+
+            var response = await client.PostAsync(
+                "https://tempuri.org/search",
+                new StringContent(@"{""params"":{""query_string"":""confetti""}}"));
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async Task GivenExpectationWithContentAndContentDoesNotMatch_InternalServerErrorIsReturned()
+        {
+            var handler = new TestableMessageHandler();
+            var client = new System.Net.Http.HttpClient(handler);
+
+            handler
+                .RespondTo()
+                .Post()
+                .ForUrl("/search")
+                .ForContent(@"{""params"":{""query_string"":""confetti""}}")
+                .With(HttpStatusCode.OK);
+
+            var response = await client.PostAsync(
+                "https://tempuri.org/search",
+                new StringContent(@"{""boo"":""baz""}"));
+
+            response
+                .StatusCode
+                .Should()
+                .Be(HttpStatusCode.InternalServerError);
+        }
     }
 }

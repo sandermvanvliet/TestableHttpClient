@@ -42,7 +42,9 @@ namespace Codenizer.HttpClient.Testable
 
                     var headersNode = queryNode.Add(headers);
 
-                    headersNode.SetRequestBuilder(requestBuilder);
+                    var contentNode = headersNode.Add(requestBuilder.ExpectedContent);
+
+                    contentNode.SetRequestBuilder(requestBuilder);
 
                     Count++;
                 }
@@ -124,7 +126,9 @@ namespace Codenizer.HttpClient.Testable
 
             var headersNode = queryNode.Match(httpRequestMessage.Headers);
 
-            return headersNode?.RequestBuilder;
+            var contentNode = headersNode?.Match(httpRequestMessage.Content);
+            
+            return contentNode?.RequestBuilder;
         }
 
         internal static ConfiguredRequests FromRequestBuilders(IEnumerable<RequestBuilder> requestBuilders)

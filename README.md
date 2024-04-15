@@ -372,6 +372,34 @@ await httpClient.PostAsync("/api/infos", new StringContent("test", Encoding.ASCI
 
 the response returned from the handler will be `415 Unsupported Media Type`
 
+### Handle requests only if they match the request body
+
+For some tests you might want to configure the handler to return certain responses based on the request content.
+
+To do this you can configure the handler like so:
+
+```csharp
+handler
+    .RespondTo()
+    .Post()
+    .ForUrl("/search")
+    .ForContent(@"{""params"":{""match"":""bar""}}")
+    .With(HttpStatusCode.BadRequest);
+```
+
+and a second one like so:
+
+```csharp
+handler
+    .RespondTo()
+    .Post()
+    .ForUrl("/search")
+    .ForContent(@"{""params"":{""match"":false}}")
+    .With(HttpStatusCode.OK);
+```
+
+Here you can see that the same endpoint returns two different responses based on the request content.
+
 ### A sequence of responses
 
 In some cases you might want to have multiple responses configured for the same endpoint, for example when you call a status endpoint of a job.
