@@ -1,5 +1,27 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.10.0.0
+
+Fixed an issue where the request headers for the content part of the request wouldn't be captured.
+
+For example, sending a request like this:
+
+```csharp
+var stringContent = new StringContent("Hello");
+stringContent.Headers.Expires = DateTimeOffset.UtcNow;
+
+var request = new HttpRequestMessage(HttpMethod.Get, "/api/info")
+{
+    Content = stringContent
+}
+```
+
+would mean that on the captured request the `Expires` header wasn't present.
+
+Now, all headers from the `request.Content.Headers` will be captured.
+
+The headers from the request itself were already captured.
+
 ## 2.9.0.0
 
 Add support to configure expected request content. 

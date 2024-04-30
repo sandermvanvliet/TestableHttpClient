@@ -188,6 +188,18 @@ namespace Codenizer.HttpClient.Testable
                 case StringContent stringContent:
                     clone.Content = new StringContent(stringContent.ReadAsStringAsync().GetAwaiter().GetResult());
                     break;
+                // FormUrlEncodedContent needs to be before ByteArrayContent
+                // because it inherits from it, and we need to handle it differently
+                case FormUrlEncodedContent formContent:
+                    var serialized = formContent.ReadAsStringAsync().GetAwaiter().GetResult();
+                    // serialized looks like field1=val1&field2=val2
+                    var formValues = serialized
+                        .Split('&')
+                        .Select(kv => kv.Split('='))
+                        .Select(parts => new KeyValuePair<string, string>(parts[0], parts[1]))
+                        .ToArray();
+                    clone.Content = new FormUrlEncodedContent(formValues);
+                    break;
                 case ByteArrayContent byteArrayContent:
                     clone.Content = new ByteArrayContent(byteArrayContent.ReadAsByteArrayAsync().GetAwaiter().GetResult());
                     break;
@@ -210,6 +222,19 @@ namespace Codenizer.HttpClient.Testable
                 default:
                     clone.Content = null;
                     break;
+            }
+
+            if (clone.Content != null)
+            {
+                // Ensure we start with a clear slate
+                clone.Content.Headers.Clear();
+
+                // Copy all original content headers.
+                // The "other" request headers have already been copied above
+                foreach (var header in request.Content.Headers)
+                {
+                    clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
             }
 
             return clone;

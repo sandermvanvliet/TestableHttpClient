@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using FluentAssertions;
 using Xunit;
 
@@ -107,6 +109,79 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
             await action
                 .Should()
                 .NotThrowAsync("the request should be a copy and not the disposed original request");
+        }
+
+        [Fact]
+        public async void GivenRequestWithFormContent_CapturedRequestContainsContent()
+        {
+            var formValues = new[]
+            {
+                new KeyValuePair<string, string>("field1", "val1"),
+                new KeyValuePair<string, string>("field2", "val2")
+            };
+
+            await _client.PostAsync("/api/info", new FormUrlEncodedContent(formValues));
+
+            _handler
+                .Requests
+                .Single()
+                .Content
+                .Should()
+                .BeOfType<FormUrlEncodedContent>();
+        }
+
+        [Fact]
+        public async void GivenRequestWithFormContent_CapturedFormContentMatchesRequest()
+        {
+            var formUrlEncodedContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("field1", "val1"),
+                new KeyValuePair<string, string>("field2", "val2")
+            });
+
+            await _client.PostAsync("/api/info", formUrlEncodedContent);
+
+            var formValuesOnCapturedRequest = await _handler
+                .Requests
+                .Single()
+                .Content
+                .As<FormUrlEncodedContent>()
+                .ReadAsStringAsync();
+
+            formValuesOnCapturedRequest
+                .Should()
+                .Be((await formUrlEncodedContent.ReadAsStringAsync()));
+        }
+
+        [Fact]
+        public async void GivenRequestWithFormContent_AllOriginalHeadersExistOnTheCapturedRequest()
+        {
+            var formUrlEncodedContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("field1", "val1"),
+                new KeyValuePair<string, string>("field2", "val2")
+            });
+
+            // Set some additional content headers to verify
+            formUrlEncodedContent.Headers.LastModified = DateTimeOffset.UtcNow;
+            formUrlEncodedContent.Headers.Expires = DateTimeOffset.UtcNow;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "/api/info")
+            {
+                Content = formUrlEncodedContent
+            };
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json", 0.8));
+
+            await _client.SendAsync(request);
+
+            var capturedRequest = _handler.Requests.Single();
+            
+            // Using ToString() here because what's sent over the wire is the string representation
+            // of the DateTimeOffset and not a strictly serialized representation.
+            capturedRequest.Content.Headers.LastModified.ToString().Should().Be(formUrlEncodedContent.Headers.LastModified.ToString());
+            capturedRequest.Content.Headers.Expires.ToString().Should().Be(formUrlEncodedContent.Headers.Expires.ToString());
+            capturedRequest.Headers.Accept.Should().BeEquivalentTo(request.Headers.Accept);
         }
     }
 }
