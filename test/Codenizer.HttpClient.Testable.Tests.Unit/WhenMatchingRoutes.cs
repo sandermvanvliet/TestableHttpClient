@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Xunit;
 
@@ -9,12 +13,16 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
     public static class ConfiguredRequestsExtensions
     {
         internal static RequestBuilder? Match(this ConfiguredRequests configuredRequests, HttpMethod method, string uri,
-            string? accept)
+            string? accept, AuthenticationHeaderValue? auth = null)
         {
             var requestMessage = new HttpRequestMessage(method, uri);
             if (!string.IsNullOrEmpty(accept))
             {
                 requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            }
+
+            if (auth != null) {
+                requestMessage.Headers.Authorization = auth;
             }
 
             return configuredRequests.Match(requestMessage);
@@ -63,6 +71,53 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                     null)
                 .Should()
                 .BeNull();
+        }
+        
+        
+        [Fact]
+        public void GivenRouteWithHeaders_RequestBuilderIsReturned()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foos/{id}", null);
+            requestBuilder.Authorization(new AuthenticationHeaderValue("Bearer"));
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+            
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foos/1234", 
+                    null,
+                    new AuthenticationHeaderValue("Bearer"))
+                .Should()
+                .Be(requestBuilder);
+        }
+        
+        
+        [Fact]
+        public void GivenRouteWithHeadersAndEmptyRequestHeaders_RequestBuilderIsNotReturned()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foos/{id}", null);
+            requestBuilder.Authorization(new AuthenticationHeaderValue("Bearer"));
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+            
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foos/1234", 
+                    null)
+                .Should()
+                .Be(null);
         }
 
         [Fact]
@@ -270,6 +325,41 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Accept
                 .Should()
                 .Be("baz/quux");
+        }
+
+        [Fact]
+        public void GivenTwoResponsesWithDifferentHeadersInRequestMatchesSecond_ResponseBuilderIsReturned() {
+            var requestBuilderOne = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
+                .Authorization(new AuthenticationHeaderValue("BEARER", "Value"));
+            var requestBuilderTwo = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
+                .Authorization(new AuthenticationHeaderValue("BEARER"));
+
+            var routes = new List<RequestBuilder>
+            {
+                (RequestBuilder)requestBuilderOne,
+                (RequestBuilder)requestBuilderTwo
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo?bar=baz",
+                    "baz/quux",
+                    new AuthenticationHeaderValue("BEARER", "Value"))
+                  .Should()
+                  .Be(requestBuilderOne);
+            
+            
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo?bar=baz",
+                    "baz/quux",
+                    new AuthenticationHeaderValue("BEARER"))
+                .Should()
+                .Be(requestBuilderTwo);
         }
 
         [Fact]
