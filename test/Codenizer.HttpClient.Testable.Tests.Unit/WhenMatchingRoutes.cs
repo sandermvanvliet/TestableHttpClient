@@ -43,6 +43,51 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Should()
                 .Be(requestBuilder);
         }
+        
+        
+        [Fact]
+        public void GivenPathWithQueryParametersAndWhen_ReturnedRequestBuilderMatches()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo/bar?blah=blurb", null);
+            requestBuilder.AndWhen(new { }, (message, o) => true);
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo/bar?blah=blurb",
+                    null)
+                .Should()
+                .Be(requestBuilder);
+        }
+        
+        [Fact]
+        public void GivenPathWithQueryParametersAndWhen_ReturnedRequestBuilderNoMatch()
+        {
+            var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foo/bar?blah=blurb", null);
+            requestBuilder.AndWhen(new { }, (message, o) => true);
+
+            var routes = new List<RequestBuilder>
+            {
+                requestBuilder
+            };
+
+            var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
+
+            dictionary
+                .Match(
+                    HttpMethod.Get,
+                    "/api/foo/bar?blah=blurb",
+                    null)
+                .Should()
+                .Be(requestBuilder);
+        }
 
         [Fact]
         public void GivenNonConfigured_NoResultIsReturned()
