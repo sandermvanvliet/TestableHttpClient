@@ -252,7 +252,7 @@ namespace Codenizer.HttpClient.Testable
             return this;
         }
 
-        public IRequestBuilder Authorization(AuthenticationHeaderValue authenticationHeader) {
+        public IRequestBuilder AndAuthorization(AuthenticationHeaderValue authenticationHeader) {
             AuthorizationHeader = authenticationHeader;
             return this;
         }

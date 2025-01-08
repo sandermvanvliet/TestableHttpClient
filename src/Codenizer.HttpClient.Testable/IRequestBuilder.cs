@@ -94,7 +94,7 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         /// <param name="authenticationHeader">A authorization header value</param>
         /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
-        IRequestBuilder Authorization(AuthenticationHeaderValue authenticationHeader);
+        IRequestBuilder AndAuthorization(AuthenticationHeaderValue authenticationHeader);
         
         /// <summary>
         /// Respond to a request that matches the accept header

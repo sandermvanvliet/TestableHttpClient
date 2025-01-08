@@ -13,7 +13,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
     public static class ConfiguredRequestsExtensions
     {
         internal static RequestBuilder? Match(this ConfiguredRequests configuredRequests, HttpMethod method, string uri,
-            string? accept, AuthenticationHeaderValue? auth = null)
+            string? accept, AuthenticationHeaderValue? authorization)
         {
             var requestMessage = new HttpRequestMessage(method, uri);
             if (!string.IsNullOrEmpty(accept))
@@ -21,8 +21,8 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
             }
 
-            if (auth != null) {
-                requestMessage.Headers.Authorization = auth;
+            if (authorization != null) {
+                requestMessage.Headers.Authorization = authorization;
             }
 
             return configuredRequests.Match(requestMessage);
@@ -47,7 +47,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo/bar?blah=blurb",
-                    null)
+                    null, null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -68,17 +68,17 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/baz", 
-                    null)
+                    null, null)
                 .Should()
                 .BeNull();
         }
         
         
         [Fact]
-        public void GivenRouteWithHeaders_RequestBuilderIsReturned()
+        public void GivenRouteWithAuthorizationHeader_RequestBuilderIsReturned()
         {
             var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foos/{id}", null);
-            requestBuilder.Authorization(new AuthenticationHeaderValue("Bearer"));
+            requestBuilder.AndAuthorization(new AuthenticationHeaderValue("Bearer"));
 
             var routes = new List<RequestBuilder>
             {
@@ -99,10 +99,10 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         
         
         [Fact]
-        public void GivenRouteWithHeadersAndEmptyRequestHeaders_RequestBuilderIsNotReturned()
+        public void GivenRouteAuthorizationHeaderAndEmptyRequestAuthorization_RequestBuilderIsNotReturned()
         {
             var requestBuilder = new RequestBuilder(HttpMethod.Get, "/api/foos/{id}", null);
-            requestBuilder.Authorization(new AuthenticationHeaderValue("Bearer"));
+            requestBuilder.AndAuthorization(new AuthenticationHeaderValue("Bearer"));
 
             var routes = new List<RequestBuilder>
             {
@@ -115,7 +115,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234", 
-                    null)
+                    null, null)
                 .Should()
                 .Be(null);
         }
@@ -136,7 +136,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234", 
-                    null)
+                    null, null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -157,7 +157,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234/?blah=baz", 
-                    null)
+                    null, null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -178,7 +178,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234?blah=baz", 
-                    null)
+                    null, null)
                 .Should()
                 .Be(requestBuilder);
         }
@@ -198,7 +198,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foos/1234?blah=qux", 
-                    null)
+                    null, null)
                 .Should()
                 .Be(routes[1]);
         }
@@ -220,7 +220,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo", 
-                    null)
+                    null, null)
                 .Should()
                 .BeNull();
         }
@@ -242,7 +242,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo",
-                    "foo/bar")
+                    "foo/bar", null)
                 .Should()
                 .NotBeNull();
         }
@@ -264,7 +264,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo",
-                    "derp/derp")
+                    "derp/derp", null)
                 .Should()
                 .BeNull();
         }
@@ -289,7 +289,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo", 
-                    "baz/quux")
+                    "baz/quux", null)
                 .Should()
                 .BeOfType<RequestBuilder>()
                 .Which
@@ -318,7 +318,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
                 .Match(
                     HttpMethod.Get,
                     "/api/foo?bar=baz", 
-                    "baz/quux")
+                    "baz/quux", null)
                 .Should()
                 .BeOfType<RequestBuilder>()
                 .Which
@@ -328,11 +328,11 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
         }
 
         [Fact]
-        public void GivenTwoResponsesWithDifferentHeadersInRequestMatchesSecond_ResponseBuilderIsReturned() {
+        public void GivenTwoResponsesWithDifferentAuthorizationInRequest_ResponseBuilderIsReturned() {
             var requestBuilderOne = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
-                .Authorization(new AuthenticationHeaderValue("BEARER", "Value"));
+                .AndAuthorization(new AuthenticationHeaderValue("BEARER", "Value"));
             var requestBuilderTwo = new RequestBuilder(HttpMethod.Get, "/api/foo?bar=baz", null)
-                .Authorization(new AuthenticationHeaderValue("BEARER"));
+                .AndAuthorization(new AuthenticationHeaderValue("BEARER"));
 
             var routes = new List<RequestBuilder>
             {
@@ -372,7 +372,7 @@ namespace Codenizer.HttpClient.Testable.Tests.Unit
 
             var dictionary = ConfiguredRequests.FromRequestBuilders(routes);
 
-            dictionary.Match(HttpMethod.Post, "/api/v2/foos/1/bla-bla", "application/json")
+            dictionary.Match(HttpMethod.Post, "/api/v2/foos/1/bla-bla", "application/json", null)
                 .Should()
                 .BeNull();
         }
