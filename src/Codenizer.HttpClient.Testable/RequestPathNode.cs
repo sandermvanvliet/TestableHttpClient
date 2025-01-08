@@ -1,17 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
     internal class RequestPathNode : RequestNode
     {
         public string Path { get; }
-        private readonly List<RequestQueryNode> _queryNodes = new List<RequestQueryNode>();
+        private readonly List<RequestWhenNode> _whenNodes = new ();
+        private readonly List<RequestQueryNode> _queryNodes = new ();
 
         public RequestPathNode(string path)
         {
             Path = path;
         }
+
+        public RequestWhenNode Add(Func<HttpRequestMessage, object, bool>? predicate, object? userValue) {
+            
+            var existingWhen = _whenNodes.SingleOrDefault(node => node.Matches(userValue));
+
+            if (existingWhen is null) {
+                _whenNodes.Add(existingWhen = new RequestWhenNode(
+                    predicate ?? ((_, _) => true),
+                    userValue ?? new object()));
+            }
+
+            return existingWhen;
+        }
+        
 
         public RequestQueryNode Add(
             List<KeyValuePair<string, string?>> queryParameters,
@@ -32,6 +49,13 @@ namespace Codenizer.HttpClient.Testable
         {
             return _queryNodes.SingleOrDefault(node => node.Matches(queryString));
         }
+
+        public RequestWhenNode? Match(HttpRequestMessage request)
+        {
+            return _whenNodes.SingleOrDefault(node => node.Matches(request));
+        }
+        
+        public bool HasWhenNodes() => _whenNodes.Any();
 
         public bool MatchesPath(string path)
         {
@@ -82,7 +106,7 @@ namespace Codenizer.HttpClient.Testable
         {
             visitor.Path(Path);
 
-            foreach (var node in _queryNodes)
+            foreach (var node in _whenNodes)
             {
                 node.Accept(visitor);
             }

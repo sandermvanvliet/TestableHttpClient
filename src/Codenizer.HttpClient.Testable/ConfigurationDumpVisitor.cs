@@ -1,4 +1,5 @@
-﻿using System.CodeDom.Compiler;
+﻿using System;
+using System.CodeDom.Compiler;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -64,6 +65,11 @@ namespace Codenizer.HttpClient.Testable
         {
             _indentedWriter.Indent = 1;
             _indentedWriter.WriteLine($"{scheme}://");
+        }
+
+        public override void When(object userData) {
+            _indentedWriter.Indent = 1;
+            _indentedWriter.WriteLine($"When: {userData}");
         }
 
         public override void Method(HttpMethod method)

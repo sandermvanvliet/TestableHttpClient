@@ -74,6 +74,15 @@ namespace Codenizer.HttpClient.Testable
         /// </summary>
         public object? Data { get; private set; }
         /// <summary>
+        /// Optional. A user defined function to inspect the message and make a dynamic Match decision
+        /// </summary>
+        public Func<HttpRequestMessage, object, bool>? Predicate { get; private set; }
+        /// <summary>
+        /// When Predicate is set, the UserObject is defined and passed to the predicate
+        /// Also used to Add in the RequestBuilders 
+        /// </summary>
+        public object? UserObject { get; private set; }
+        /// <summary>
         /// Optional. The callback to invoke when generating the response to a request.
         /// </summary>
         public Func<HttpRequestMessage, object>? ResponseCallback { get; private set; }
@@ -242,6 +251,12 @@ namespace Codenizer.HttpClient.Testable
             }
 
             ContentType = contentType;
+            return this;
+        }
+
+        public IRequestBuilder AndWhen(object userData, Func<HttpRequestMessage, object, bool> predicate) {
+            Predicate = predicate;
+            UserObject = userData;
             return this;
         }
 

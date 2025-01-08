@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -35,8 +35,15 @@ namespace Codenizer.HttpClient.Testable
                         .Split('?').First();
 
                     var pathNode = authorityNode.Add(path);
-
-                    var queryNode = pathNode.Add(requestBuilder.QueryParameters, requestBuilder.QueryStringAssertions);
+                    
+                    RequestQueryNode queryNode;
+                    if (requestBuilder.Predicate != null) {
+                        var whenNode = pathNode.Add(requestBuilder.Predicate, requestBuilder.UserObject);
+                        queryNode = whenNode.Add(requestBuilder.QueryParameters, requestBuilder.QueryStringAssertions);
+                    }
+                    else
+                        queryNode = pathNode.Add(requestBuilder.QueryParameters, requestBuilder.QueryStringAssertions);
+                    
 
                     var headers = requestBuilder.BuildRequestHeaders();
 
@@ -117,7 +124,16 @@ namespace Codenizer.HttpClient.Testable
                     ? httpRequestMessage.RequestUri.OriginalString.Split('?').Last()
                     : null;
 
-            var queryNode = pathNode.Match(query);
+            
+            RequestQueryNode queryNode;
+            if (pathNode.HasWhenNodes()) {
+                var whenNode = pathNode.Match(httpRequestMessage);
+                if (whenNode == null)
+                    return null;
+                queryNode = whenNode.Match(query);
+            }
+            else
+                queryNode = pathNode.Match(query);
 
             if (queryNode == null)
             {

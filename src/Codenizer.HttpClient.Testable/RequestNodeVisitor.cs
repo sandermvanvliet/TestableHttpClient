@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
@@ -9,6 +10,7 @@ namespace Codenizer.HttpClient.Testable
         public abstract void Path(string path);
         public abstract void Authority(string authority);
         public abstract void Scheme(string scheme);
+        public abstract void When(object userData);
         public abstract void Method(HttpMethod method);
         public abstract void Response(RequestBuilder requestBuilder);
         public abstract void Content(string expectedContent);

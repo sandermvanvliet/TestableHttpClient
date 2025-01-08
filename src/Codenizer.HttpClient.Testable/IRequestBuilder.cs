@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 
 namespace Codenizer.HttpClient.Testable
 {
@@ -87,6 +88,14 @@ namespace Codenizer.HttpClient.Testable
         /// <param name="contentType">A MIME content type (for example text/plain)</param>
         /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
         IRequestBuilder AndContentType(string contentType);
+        
+        
+        /// <summary>
+        /// Respond to a request that matches the given content type
+        /// </summary>
+        /// <param name="contentType">A MIME content type (for example text/plain)</param>
+        /// <returns>The current <see cref="IRequestBuilder"/> instance</returns>
+        IRequestBuilder AndWhen(object userData, Func<HttpRequestMessage, object, bool> predicate);
         
         /// <summary>
         /// Respond to a request that matches the accept header
