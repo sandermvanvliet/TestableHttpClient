@@ -1,5 +1,20 @@
 # Codenizer.HttpClient.Testable Changelog
 
+## 2.11.0.0
+
+Add support to configure an expected `Authorization` header on requests. Contributed by [Joshua5](https://github.com/Joshhua5) in [#26](https://github.com/sandermvanvliet/TestableHttpClient/pull/26)
+
+Usage:
+
+```csharp
+handler
+    .RespondTo()
+    .Post()
+    .ForUrl("/search")
+    .AndAuthorization(new AuthenticationHeaderValue("Scheme", "Value"))
+    .With(HttpStatusCode.Forbidden);
+```
+
 ## 2.10.0.0
 
 Fixed an issue where the request headers for the content part of the request wouldn't be captured.
