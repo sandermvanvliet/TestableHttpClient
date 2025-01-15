@@ -372,6 +372,24 @@ await httpClient.PostAsync("/api/infos", new StringContent("test", Encoding.ASCI
 
 the response returned from the handler will be `415 Unsupported Media Type`
 
+
+### Handle requests only if they match the authorization header
+
+For some tests you might want to configure the handler to return when the correct authorization token is provided.
+
+To do this you can configure the handler like so:
+
+```csharp
+handler
+    .RespondTo()
+    .Post()
+    .ForUrl("/search")
+    .AndAuthorization(new AuthenticationHeaderValue("Scheme", "Value"))
+    .With(HttpStatusCode.OK);
+```
+
+This allows you to configure multiple responses to a url depending on the authorization of a request.
+
 ### Handle requests only if they match the request body
 
 For some tests you might want to configure the handler to return certain responses based on the request content.

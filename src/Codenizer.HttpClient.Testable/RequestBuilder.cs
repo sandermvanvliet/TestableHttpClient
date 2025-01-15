@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -118,6 +119,12 @@ namespace Codenizer.HttpClient.Testable
         /// Optional. The value of the Accept header to match.
         /// </summary>
         public string? Accept { get; private set; }
+        
+        
+        /// <summary>
+        /// Optional. The value of the Accept header to match.
+        /// </summary>
+        public AuthenticationHeaderValue? AuthorizationHeader { get; private set; }
 
         /// <summary>
         /// Optional. The expected content of the request.
@@ -242,6 +249,11 @@ namespace Codenizer.HttpClient.Testable
             }
 
             ContentType = contentType;
+            return this;
+        }
+
+        public IRequestBuilder AndAuthorization(AuthenticationHeaderValue authenticationHeader) {
+            AuthorizationHeader = authenticationHeader;
             return this;
         }
 
@@ -396,6 +408,11 @@ namespace Codenizer.HttpClient.Testable
         {
             var headers = new Dictionary<string, string>();
 
+            if (AuthorizationHeader is not null)
+            {
+                headers.Add("Authorization", AuthorizationHeader.ToString());
+            }
+            
             if (!string.IsNullOrEmpty(Accept))
             {
                 headers.Add("Accept", Accept!);
